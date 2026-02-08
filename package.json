@@ -4,8 +4,10 @@
   "description": "FreeCodeCamp Backend Certification Projects",
   "scripts": {
     "start:timestamp": "cd projects/timestamp-microservice && npm start",
-    "dev:timestamp": "cd projects/timestamp-microservice && npm run dev"
+    "dev:timestamp": "cd projects/timestamp-microservice && npm run dev",
+    "start:header-parser": "cd projects/request-header-parser && npm start",
+    "dev:header-parser": "cd projects/request-header-parser && npm run dev"
   },
-  "author": "Your Name",
+  "author": "Bhavy Upreti",
   "license": "MIT"
 }
