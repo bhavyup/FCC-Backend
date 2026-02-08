@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Timestamp Microservice | FCC Backend</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500&family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Animated Background -->
+    <div class="bg-animation">
+      <div class="floating-shapes">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+        <div class="shape shape-3"></div>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Hero Section -->
+      <section class="hero">
+        <div class="hero-badge">
+          <i class="fas fa-certificate"></i>
+          FreeCodeCamp Backend Certification
+        </div>
+        <h1 class="hero-title">
+          <span class="gradient-text">Timestamp</span>
+          <span class="subtitle">Microservice API</span>
+        </h1>
+        <p class="hero-description">
+          Convert dates to Unix timestamps and UTC format instantly. 
+          A RESTful API built with Node.js and Express.
+        </p>
+      </section>
+
+      <!-- Live Clock -->
+      <section class="live-clock-section">
+        <div class="clock-card">
+          <div class="clock-header">
+            <i class="fas fa-clock"></i>
+            <span>Current Time</span>
+          </div>
+          <div class="clock-display">
+            <div class="time-value" id="current-time">--:--:--</div>
+            <div class="date-value" id="current-date">Loading...</div>
+          </div>
+          <div class="clock-footer">
+            <div class="timestamp-display">
+              <span class="label">Unix:</span>
+              <span class="value" id="current-unix">---</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Interactive Tester -->
+      <section class="tester-section">
+        <div class="tester-card">
+          <div class="tester-header">
+            <h2><i class="fas fa-flask"></i> API Tester</h2>
+            <p>Try the API with different date formats</p>
+          </div>
+          
+          <div class="tester-body">
+            <div class="input-group">
+              <label for="date-input">Enter a date or timestamp</label>
+              <div class="input-wrapper">
+                <input 
+                  type="text" 
+                  id="date-input" 
+                  placeholder="e.g., 2015-12-25, 1451001600000, or leave empty"
+                >
+                <button id="test-btn" class="btn-primary">
+                  <i class="fas fa-paper-plane"></i>
+                  Test
+                </button>
+              </div>
+            </div>
+
+            <div class="quick-tests">
+              <span class="quick-label">Quick tests:</span>
+              <button class="quick-btn" data-value="">Now</button>
+              <button class="quick-btn" data-value="2015-12-25">2015-12-25</button>
+              <button class="quick-btn" data-value="1451001600000">Unix TS</button>
+              <button class="quick-btn" data-value="invalid-date">Invalid</button>
+            </div>
+
+            <div class="result-container" id="result-container">
+              <div class="result-header">
+                <span class="method-badge">GET</span>
+                <span class="endpoint" id="endpoint-display">/api</span>
+              </div>
+              <div class="result-body">
+                <pre id="result-output">// Response will appear here</pre>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- API Documentation -->
+      <section class="docs-section">
+        <h2 class="section-title">
+          <i class="fas fa-book"></i>
+          API Documentation
+        </h2>
+        
+        <div class="docs-grid">
+          <div class="doc-card">
+            <div class="doc-icon">
+              <i class="fas fa-calendar-check"></i>
+            </div>
+            <h3>Valid Date String</h3>
+            <div class="endpoint-example">
+              <code>GET /api/2015-12-25</code>
+            </div>
+            <div class="response-example">
+              <pre>{
+  "unix": 1451001600000,
+  "utc": "Fri, 25 Dec 2015 00:00:00 GMT"
+}</pre>
+            </div>
+          </div>
+
+          <div class="doc-card">
+            <div class="doc-icon">
+              <i class="fas fa-hashtag"></i>
+            </div>
+            <h3>Unix Timestamp</h3>
+            <div class="endpoint-example">
+              <code>GET /api/1451001600000</code>
+            </div>
+            <div class="response-example">
+              <pre>{
+  "unix": 1451001600000,
+  "utc": "Fri, 25 Dec 2015 00:00:00 GMT"
+}</pre>
+            </div>
+          </div>
+
+          <div class="doc-card">
+            <div class="doc-icon">
+              <i class="fas fa-clock"></i>
+            </div>
+            <h3>Current Time</h3>
+            <div class="endpoint-example">
+              <code>GET /api</code>
+            </div>
+            <div class="response-example">
+              <pre>{
+  "unix": [current timestamp],
+  "utc": "[current UTC time]"
+}</pre>
+            </div>
+          </div>
+
+          <div class="doc-card error">
+            <div class="doc-icon">
+              <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <h3>Invalid Date</h3>
+            <div class="endpoint-example">
+              <code>GET /api/invalid-date</code>
+            </div>
+            <div class="response-example">
+              <pre>{
+  "error": "Invalid Date"
+}</pre>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Footer -->
+      <footer class="footer">
+        <div class="footer-content">
+          <p>
+            <i class="fas fa-code"></i>
+            Built for <a href="https://freecodecamp.org" target="_blank">freeCodeCamp</a> 
+            Backend Certification
+          </p>
+          <div class="footer-links">
+            <a href="https://github.com" target="_blank">
+              <i class="fab fa-github"></i>
+            </a>
+          </div>
+        </div>
+      </footer>
+    </main>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
