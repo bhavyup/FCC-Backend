@@ -606,6 +606,30 @@ body {
   text-decoration: underline;
 }
 
+.footer-links {
+  margin-bottom: 10px;
+}
+
+.footer-links a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 50%;
+  color: var(--text-secondary);
+  font-size: 1.1rem;
+  transition: all 0.2s ease;
+}
+
+.footer-links a:hover {
+  background: var(--gradient-primary);
+  border-color: transparent;
+  color: white;
+}
+
 .project-nav {
   display: flex;
   align-items: center;

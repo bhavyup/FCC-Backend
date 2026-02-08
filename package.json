@@ -6,7 +6,9 @@
     "start:timestamp": "cd projects/timestamp-microservice && npm start",
     "dev:timestamp": "cd projects/timestamp-microservice && npm run dev",
     "start:header-parser": "cd projects/request-header-parser && npm start",
-    "dev:header-parser": "cd projects/request-header-parser && npm run dev"
+    "dev:header-parser": "cd projects/request-header-parser && npm run dev",
+    "start:url-shortener": "cd projects/url-shortener && npm start",
+    "dev:url-shortener": "cd projects/url-shortener && npm run dev"
   },
   "author": "Bhavy Upreti",
   "license": "MIT"

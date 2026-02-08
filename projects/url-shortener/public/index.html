@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>URL Shortener | FCC Backend</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Animated Background -->
+    <div class="bg-animation">
+      <div class="floating-shapes">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+        <div class="shape shape-3"></div>
+        <div class="shape shape-4"></div>
+      </div>
+      <div class="grid-overlay"></div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Hero Section -->
+      <section class="hero">
+        <div class="hero-badge">
+          <i class="fas fa-certificate"></i>
+          FreeCodeCamp Backend Certification
+        </div>
+        <h1 class="hero-title">
+          <span class="gradient-text">URL Shortener</span>
+          <span class="subtitle">Microservice</span>
+        </h1>
+        <p class="hero-description">
+          Transform long URLs into short, shareable links instantly. 
+          Fast, simple, and reliable URL shortening service.
+        </p>
+      </section>
+
+      <!-- Shortener Card -->
+      <section class="shortener-section">
+        <div class="shortener-card">
+          <div class="card-header">
+            <div class="header-icon">
+              <i class="fas fa-link"></i>
+            </div>
+            <div class="header-text">
+              <h2>Shorten Your URL</h2>
+              <p>Paste your long URL below</p>
+            </div>
+          </div>
+
+          <form id="url-form" class="url-form">
+            <div class="input-group">
+              <div class="input-wrapper">
+                <i class="fas fa-globe input-icon"></i>
+                <input 
+                  type="text" 
+                  id="url-input" 
+                  name="url"
+                  placeholder="https://www.example.com/very/long/url/path"
+                  autocomplete="off"
+                  required
+                >
+              </div>
+              <button type="submit" class="btn-shorten" id="submit-btn">
+                <i class="fas fa-compress-alt"></i>
+                <span>Shorten</span>
+              </button>
+            </div>
+          </form>
+
+          <!-- Result Section -->
+          <div class="result-section" id="result-section" style="display: none;">
+            <div class="result-card success" id="result-success" style="display: none;">
+              <div class="result-icon">
+                <i class="fas fa-check-circle"></i>
+              </div>
+              <div class="result-content">
+                <div class="result-label">Your shortened URL</div>
+                <div class="result-urls">
+                  <div class="original-url">
+                    <span class="url-label">Original:</span>
+                    <span class="url-value" id="original-url-display">-</span>
+                  </div>
+                  <div class="short-url-container">
+                    <span class="url-label">Short URL:</span>
+                    <a href="#" class="short-url-link" id="short-url-link" target="_blank">
+                      <span id="short-url-display">-</span>
+                      <i class="fas fa-external-link-alt"></i>
+                    </a>
+                    <button class="copy-btn" id="copy-short-url">
+                      <i class="fas fa-copy"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="result-card error" id="result-error" style="display: none;">
+              <div class="result-icon">
+                <i class="fas fa-exclamation-circle"></i>
+              </div>
+              <div class="result-content">
+                <div class="result-label">Error</div>
+                <div class="error-message" id="error-message">Invalid URL</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- JSON Response -->
+          <div class="json-response" id="json-response" style="display: none;">
+            <div class="json-header">
+              <span><i class="fas fa-code"></i> API Response</span>
+              <button class="copy-btn small" id="copy-json">
+                <i class="fas fa-copy"></i>
+                Copy
+              </button>
+            </div>
+            <pre id="json-output"></pre>
+          </div>
+        </div>
+      </section>
+
+      <!-- Recent URLs -->
+      <section class="recent-section">
+        <div class="section-header">
+          <h2 class="section-title">
+            <i class="fas fa-history"></i>
+            Recent Shortened URLs
+          </h2>
+          <button class="refresh-btn" id="refresh-urls">
+            <i class="fas fa-sync-alt"></i>
+          </button>
+        </div>
+        
+        <div class="urls-list" id="urls-list">
+          <div class="empty-state">
+            <i class="fas fa-link-slash"></i>
+            <p>No URLs shortened yet</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- API Documentation -->
+      <section class="docs-section">
+        <h2 class="section-title">
+          <i class="fas fa-book"></i>
+          API Documentation
+        </h2>
+
+        <div class="docs-grid">
+          <!-- POST endpoint -->
+          <div class="doc-card">
+            <div class="doc-header">
+              <span class="method-badge post">POST</span>
+              <code class="endpoint-url">/api/shorturl</code>
+            </div>
+            <p class="doc-description">
+              Submit a URL to be shortened. Send the URL in the request body.
+            </p>
+            <div class="doc-example">
+              <div class="example-label">Request Body:</div>
+              <pre>{ "url": "https://www.google.com" }</pre>
+            </div>
+            <div class="doc-example">
+              <div class="example-label">Success Response:</div>
+              <pre>{
+  "original_url": "https://www.google.com",
+  "short_url": 1
+}</pre>
+            </div>
+            <div class="doc-example error">
+              <div class="example-label">Error Response:</div>
+              <pre>{ "error": "invalid url" }</pre>
+            </div>
+          </div>
+
+          <!-- GET endpoint -->
+          <div class="doc-card">
+            <div class="doc-header">
+              <span class="method-badge get">GET</span>
+              <code class="endpoint-url">/api/shorturl/:id</code>
+            </div>
+            <p class="doc-description">
+              Visit a shortened URL to be redirected to the original URL.
+            </p>
+            <div class="doc-example">
+              <div class="example-label">Example:</div>
+              <pre>GET /api/shorturl/1
+
+→ Redirects to: https://www.google.com</pre>
+            </div>
+          </div>
+        </div>
+
+        <!-- Valid URL formats -->
+        <div class="url-formats">
+          <h3><i class="fas fa-check-circle"></i> Valid URL Formats</h3>
+          <div class="format-grid">
+            <div class="format-item valid">
+              <code>https://www.example.com</code>
+              <i class="fas fa-check"></i>
+            </div>
+            <div class="format-item valid">
+              <code>http://example.com/path</code>
+              <i class="fas fa-check"></i>
+            </div>
+            <div class="format-item valid">
+              <code>https://sub.domain.org</code>
+              <i class="fas fa-check"></i>
+            </div>
+            <div class="format-item invalid">
+              <code>ftp://files.com</code>
+              <i class="fas fa-times"></i>
+            </div>
+            <div class="format-item invalid">
+              <code>www.example.com</code>
+              <i class="fas fa-times"></i>
+            </div>
+            <div class="format-item invalid">
+              <code>not-a-valid-url</code>
+              <i class="fas fa-times"></i>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Footer -->
+      <footer class="footer">
+        <div class="footer-content">
+          <p>
+            <i class="fas fa-code"></i>
+            Built for <a href="https://freecodecamp.org" target="_blank">freeCodeCamp</a> 
+            Backend Certification
+          </p>
+          <div class="project-nav">
+            <a href="#" class="nav-link">
+              <i class="fas fa-arrow-left"></i>
+              Header Parser
+            </a>
+            <span class="nav-divider">|</span>
+            <a href="#" class="nav-link">
+              Exercise Tracker
+              <i class="fas fa-arrow-right"></i>
+            </a>
+          </div>
+        </div>
+      </footer>
+    </main>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
