@@ -22,29 +22,22 @@ app.post('/api/shorturl', (req, res) => {
   console.log('Received URL:', originalUrl);
 
   if (!originalUrl) {
-    console.log('No URL provided');
     return res.json({ error: 'invalid url' });
   }
 
-  // Try to parse URL
   let parsedUrl;
   try {
     parsedUrl = new URL(originalUrl);
-    console.log('Parsed successfully:', parsedUrl.href);
-    console.log('Protocol:', parsedUrl.protocol);
-    console.log('Hostname:', parsedUrl.hostname);
   } catch (e) {
     console.log('Parse error:', e.message);
     return res.json({ error: 'invalid url' });
   }
 
-  // Check protocol
   if (parsedUrl.protocol !== 'http:' && parsedUrl.protocol !== 'https:') {
     console.log('Bad protocol:', parsedUrl.protocol);
     return res.json({ error: 'invalid url' });
   }
 
-  // DNS lookup
   dns.lookup(parsedUrl.hostname, (err, address) => {
     if (err) {
       console.log('DNS error:', err.message);
@@ -81,9 +74,10 @@ app.post('/api/shorturl', (req, res) => {
 
 // GET - Redirect
 app.get('/api/shorturl/:short_url', (req, res) => {
-  console.log('Redirect request:', req.params.short_url);
+  const param = req.params.short_url;
+  console.log('Redirect request:', param);
 
-  const shortUrl = parseInt(req.params.short_url, 10);
+  const shortUrl = parseInt(param, 10);
 
   if (isNaN(shortUrl)) {
     return res.json({ error: 'Wrong format' });
@@ -92,20 +86,20 @@ app.get('/api/shorturl/:short_url', (req, res) => {
   const entry = urlDatabase.find(u => u.short_url === shortUrl);
 
   if (!entry) {
-    console.log('Not found. Database:', urlDatabase);
+    console.log('Not found. DB:', JSON.stringify(urlDatabase));
     return res.json({ error: 'No short URL found' });
   }
 
   console.log('Redirecting to:', entry.original_url);
-  return res.redirect(entry.original_url);
+  res.redirect(entry.original_url);
 });
 
-// GET - List URLs
+// GET - List URLs (for debugging)
 app.get('/api/urls', (req, res) => {
-  res.json(urlDatabase);
+  res.json({ count: urlDatabase.length, urls: urlDatabase });
 });
 
-// Static files AFTER API routes
+// Static files
 app.use(express.static('public'));
 
 app.get('/', (req, res) => {
@@ -114,4 +108,5 @@ app.get('/', (req, res) => {
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
+  console.log('Database cleared - fresh start');
 });
