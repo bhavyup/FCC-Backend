@@ -1,198 +1,206 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Request Header Parser | FCC Backend</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500&family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="styles.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Request Header Parser | FCC Backend</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500&family=Orbitron:wght@400;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
-  <div class="app-container">
-    <!-- Animated Background -->
-    <div class="bg-animation">
-      <div class="floating-shapes">
-        <div class="shape shape-1"></div>
-        <div class="shape shape-2"></div>
-        <div class="shape shape-3"></div>
-      </div>
-      <div class="grid-overlay"></div>
-    </div>
-
-    <!-- Main Content -->
-    <main class="main-content">
-      <!-- Hero Section -->
-      <section class="hero">
-        <div class="hero-badge">
-          <i class="fas fa-certificate"></i>
-          FreeCodeCamp Backend Certification
+    <div class="app-container">
+        <!-- Animated Background -->
+        <div class="bg-animation">
+            <div class="floating-shapes">
+                <div class="shape shape-1"></div>
+                <div class="shape shape-2"></div>
+                <div class="shape shape-3"></div>
+            </div>
+            <div class="grid-overlay"></div>
         </div>
-        <h1 class="hero-title">
-          <span class="gradient-text">Request Header</span>
-          <span class="subtitle">Parser Microservice</span>
-        </h1>
-        <p class="hero-description">
-          Discover your digital fingerprint. This API reveals your IP address, 
-          preferred language, and browser information from HTTP headers.
-        </p>
-      </section>
 
-      <!-- Your Info Card -->
-      <section class="info-section">
-        <div class="info-card">
-          <div class="card-header">
-            <div class="header-icon">
-              <i class="fas fa-user-secret"></i>
-            </div>
-            <div class="header-text">
-              <h2>Your Digital Identity</h2>
-              <p>Information extracted from your request headers</p>
-            </div>
-            <button class="refresh-btn" id="refresh-btn">
-              <i class="fas fa-sync-alt"></i>
-            </button>
-          </div>
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Hero Section -->
+            <section class="hero">
+                <div class="hero-badge">
+                    <i class="fas fa-certificate"></i>
+                    FreeCodeCamp Backend Certification
+                </div>
+                <h1 class="hero-title">
+                    <span class="gradient-text">Request Header</span>
+                    <span class="subtitle">Parser Microservice</span>
+                </h1>
+                <p class="hero-description">
+                    Discover your digital fingerprint. This API reveals your IP address,
+                    preferred language, and browser information from HTTP headers.
+                </p>
+            </section>
 
-          <div class="info-grid" id="info-grid">
-            <!-- IP Address -->
-            <div class="info-item">
-              <div class="info-icon ip">
-                <i class="fas fa-network-wired"></i>
-              </div>
-              <div class="info-content">
-                <span class="info-label">IP Address</span>
-                <span class="info-value" id="ip-value">Loading...</span>
-              </div>
-              <div class="info-badge">ipaddress</div>
-            </div>
+            <!-- Your Info Card -->
+            <section class="info-section">
+                <div class="info-card">
+                    <div class="card-header">
+                        <div class="header-icon">
+                            <i class="fas fa-user-secret"></i>
+                        </div>
+                        <div class="header-text">
+                            <h2>Your Digital Identity</h2>
+                            <p>Information extracted from your request headers</p>
+                        </div>
+                        <button class="refresh-btn" id="refresh-btn">
+                            <i class="fas fa-sync-alt"></i>
+                        </button>
+                    </div>
 
-            <!-- Language -->
-            <div class="info-item">
-              <div class="info-icon lang">
-                <i class="fas fa-language"></i>
-              </div>
-              <div class="info-content">
-                <span class="info-label">Preferred Language</span>
-                <span class="info-value" id="lang-value">Loading...</span>
-              </div>
-              <div class="info-badge">language</div>
-            </div>
+                    <div class="info-grid" id="info-grid">
+                        <!-- IP Address -->
+                        <div class="info-item">
+                            <div class="info-icon ip">
+                                <i class="fas fa-network-wired"></i>
+                            </div>
+                            <div class="info-content">
+                                <span class="info-label">IP Address</span>
+                                <span class="info-value" id="ip-value">Loading...</span>
+                            </div>
+                            <div class="info-badge">ipaddress</div>
+                        </div>
 
-            <!-- Software -->
-            <div class="info-item full-width">
-              <div class="info-icon software">
-                <i class="fas fa-laptop-code"></i>
-              </div>
-              <div class="info-content">
-                <span class="info-label">Browser / Software</span>
-                <span class="info-value software-value" id="software-value">Loading...</span>
-              </div>
-              <div class="info-badge">software</div>
-            </div>
-          </div>
+                        <!-- Language -->
+                        <div class="info-item">
+                            <div class="info-icon lang">
+                                <i class="fas fa-language"></i>
+                            </div>
+                            <div class="info-content">
+                                <span class="info-label">Preferred Language</span>
+                                <span class="info-value" id="lang-value">Loading...</span>
+                            </div>
+                            <div class="info-badge">language</div>
+                        </div>
 
-          <!-- Raw JSON -->
-          <div class="raw-response">
-            <div class="raw-header">
-              <span><i class="fas fa-code"></i> Raw JSON Response</span>
-              <button class="copy-btn" id="copy-btn">
-                <i class="fas fa-copy"></i>
-                Copy
-              </button>
-            </div>
-            <pre id="raw-json">// Loading...</pre>
-          </div>
-        </div>
-      </section>
+                        <!-- Software -->
+                        <div class="info-item full-width">
+                            <div class="info-icon software">
+                                <i class="fas fa-laptop-code"></i>
+                            </div>
+                            <div class="info-content">
+                                <span class="info-label">Browser / Software</span>
+                                <span class="info-value software-value" id="software-value">Loading...</span>
+                            </div>
+                            <div class="info-badge">software</div>
+                        </div>
+                    </div>
 
-      <!-- API Documentation -->
-      <section class="docs-section">
-        <h2 class="section-title">
-          <i class="fas fa-book"></i>
-          API Documentation
-        </h2>
+                    <!-- Raw JSON -->
+                    <div class="raw-response">
+                        <div class="raw-header">
+                            <span><i class="fas fa-code"></i> Raw JSON Response</span>
+                            <button class="copy-btn" id="copy-btn">
+                                <i class="fas fa-copy"></i>
+                                Copy
+                            </button>
+                        </div>
+                        <pre id="raw-json">// Loading...</pre>
+                    </div>
+                </div>
+            </section>
 
-        <div class="docs-grid">
-          <div class="doc-card main-endpoint">
-            <div class="doc-header">
-              <span class="method-badge get">GET</span>
-              <code class="endpoint-url">/api/whoami</code>
-            </div>
-            <p class="doc-description">
-              Returns a JSON object containing your IP address, preferred language, 
-              and software (User-Agent) information extracted from request headers.
-            </p>
-            <div class="doc-example">
-              <div class="example-label">Example Response:</div>
-              <pre>{
+            <!-- API Documentation -->
+            <section class="docs-section">
+                <h2 class="section-title">
+                    <i class="fas fa-book"></i>
+                    API Documentation
+                </h2>
+
+                <div class="docs-grid">
+                    <div class="doc-card main-endpoint">
+                        <div class="doc-header">
+                            <span class="method-badge get">GET</span>
+                            <code class="endpoint-url">/api/whoami</code>
+                        </div>
+                        <p class="doc-description">
+                            Returns a JSON object containing your IP address, preferred language,
+                            and software (User-Agent) information extracted from request headers.
+                        </p>
+                        <div class="doc-example">
+                            <div class="example-label">Example Response:</div>
+                            <pre>{
   "ipaddress": "159.20.14.100",
   "language": "en-US,en;q=0.9",
   "software": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)..."
 }</pre>
-            </div>
-          </div>
-        </div>
+                        </div>
+                    </div>
+                </div>
 
-        <!-- Headers Explanation -->
-        <div class="headers-info">
-          <h3><i class="fas fa-info-circle"></i> Understanding HTTP Headers</h3>
-          <div class="headers-grid">
-            <div class="header-item">
-              <div class="header-name">X-Forwarded-For / IP</div>
-              <p>Your public IP address, identifying your network location on the internet.</p>
-            </div>
-            <div class="header-item">
-              <div class="header-name">Accept-Language</div>
-              <p>Languages your browser prefers, helping servers deliver localized content.</p>
-            </div>
-            <div class="header-item">
-              <div class="header-name">User-Agent</div>
-              <p>Information about your browser, operating system, and device.</p>
-            </div>
-          </div>
-        </div>
-      </section>
+                <!-- Headers Explanation -->
+                <div class="headers-info">
+                    <h3><i class="fas fa-info-circle"></i> Understanding HTTP Headers</h3>
+                    <div class="headers-grid">
+                        <div class="header-item">
+                            <div class="header-name">X-Forwarded-For / IP</div>
+                            <p>Your public IP address, identifying your network location on the internet.</p>
+                        </div>
+                        <div class="header-item">
+                            <div class="header-name">Accept-Language</div>
+                            <p>Languages your browser prefers, helping servers deliver localized content.</p>
+                        </div>
+                        <div class="header-item">
+                            <div class="header-name">User-Agent</div>
+                            <p>Information about your browser, operating system, and device.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
 
-      <!-- Try It Section -->
-      <section class="try-section">
-        <div class="try-card">
-          <h3><i class="fas fa-terminal"></i> Try with cURL</h3>
-          <div class="curl-command">
-            <code id="curl-command">curl <span class="url-placeholder">[your-url]</span>/api/whoami</code>
-            <button class="copy-btn small" id="copy-curl">
-              <i class="fas fa-copy"></i>
-            </button>
-          </div>
-        </div>
-      </section>
+            <!-- Try It Section -->
+            <section class="try-section">
+                <div class="try-card">
+                    <h3><i class="fas fa-terminal"></i> Try with cURL</h3>
+                    <div class="curl-command">
+                        <code id="curl-command">curl <span class="url-placeholder">[your-url]</span>/api/whoami</code>
+                        <button class="copy-btn small" id="copy-curl">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                    </div>
+                </div>
+            </section>
 
-      <!-- Footer -->
-      <footer class="footer">
-        <div class="footer-content">
-          <p>
-            <i class="fas fa-code"></i>
-            Built for <a href="https://freecodecamp.org" target="_blank">freeCodeCamp</a> 
-            Backend Certification
-          </p>
-          <div class="project-nav">
-            <a href="#" class="nav-link">
-              <i class="fas fa-arrow-left"></i>
-              Timestamp Microservice
-            </a>
-            <span class="nav-divider">|</span>
-            <a href="#" class="nav-link">
-              URL Shortener
-              <i class="fas fa-arrow-right"></i>
-            </a>
-          </div>
-        </div>
-      </footer>
-    </main>
-  </div>
+            <!-- Footer -->
+            <footer class="footer">
+                <div class="footer-content">
+                    <p>
+                        <i class="fas fa-code"></i>
+                        Built for <a href="https://freecodecamp.org" target="_blank">freeCodeCamp</a>
+                        Backend Certification
+                    </p>
+                    <div class="project-nav">
+                        <a href="https://fcc-timestamp-microservice-6b1s.onrender.com" class="nav-link">
+                            <i class="fas fa-arrow-left"></i>
+                            Timestamp Microservice
+                        </a>
+                        <span class="nav-divider">|</span>
+                        <a href="https://fcc-url-shortener-ap2o.onrender.com" class="nav-link">
+                            URL Shortener
+                            <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                    <a href="https://github.com/bhavyup/FCC-Backend/tree/main/projects/request-header-parser" target="_blank">
+                        <i class="fab fa-github"></i>
+                    </a>
+                </div>
+            </footer>
+        </main>
+    </div>
 
-  <script src="script.js"></script>
+    <script src="script.js"></script>
 </body>
+
 </html>
