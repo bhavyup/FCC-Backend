@@ -32,12 +32,16 @@ urlForm.addEventListener('submit', async (e) => {
   submitBtn.innerHTML = '<i class="fas fa-spinner"></i><span>Shortening...</span>';
   
   try {
+    // Use URLSearchParams to send as application/x-www-form-urlencoded
+    const formData = new URLSearchParams();
+    formData.append('url', url);
+
     const response = await fetch('/api/shorturl', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/x-www-form-urlencoded'
       },
-      body: JSON.stringify({ url })
+      body: formData
     });
     
     const data = await response.json();
