@@ -1,171 +1,117 @@
-// server.js
 const express = require('express');
 const cors = require('cors');
 const dns = require('dns');
-const url = require('url');
 const path = require('path');
-const fs = require('fs');
 
 const app = express();
 const PORT = process.env.PORT || 3002;
 
-// Database file path
-const DB_FILE = path.join(__dirname, 'data', 'urls.json');
-
-// Ensure data directory and file exist
-function initDatabase() {
-  const dataDir = path.join(__dirname, 'data');
-  if (!fs.existsSync(dataDir)) {
-    fs.mkdirSync(dataDir, { recursive: true });
-  }
-  if (!fs.existsSync(DB_FILE)) {
-    fs.writeFileSync(DB_FILE, JSON.stringify({ urls: [], counter: 0 }));
-  }
-}
-
-// Read database
-function readDatabase() {
-  try {
-    const data = fs.readFileSync(DB_FILE, 'utf8');
-    return JSON.parse(data);
-  } catch (error) {
-    return { urls: [], counter: 0 };
-  }
-}
-
-// Write database
-function writeDatabase(data) {
-  fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2));
-}
-
-// Initialize database on startup
-initDatabase();
+// In-memory database
+let urlDatabase = [];
+let counter = 0;
 
 // Middleware
 app.use(cors({ optionsSuccessStatus: 200 }));
-app.use(express.static('public'));
-
-// IMPORTANT: Body parsers for both JSON and URL-encoded data
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Serve the main page
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
-
-// API endpoint - Create short URL (POST)
+// POST - Create short URL
 app.post('/api/shorturl', (req, res) => {
-  // Get URL from body (works for both JSON and form-urlencoded)
   const originalUrl = req.body.url;
 
-  console.log('Received URL:', originalUrl); // Debug log
+  console.log('Received URL:', originalUrl);
 
-  // Validate URL exists
   if (!originalUrl) {
+    console.log('No URL provided');
     return res.json({ error: 'invalid url' });
   }
 
-  // Parse the URL to validate format
+  // Try to parse URL
   let parsedUrl;
   try {
     parsedUrl = new URL(originalUrl);
-  } catch (error) {
-    console.log('URL parse error:', error.message);
+    console.log('Parsed successfully:', parsedUrl.href);
+    console.log('Protocol:', parsedUrl.protocol);
+    console.log('Hostname:', parsedUrl.hostname);
+  } catch (e) {
+    console.log('Parse error:', e.message);
     return res.json({ error: 'invalid url' });
   }
 
-  // Check if protocol is http or https
+  // Check protocol
   if (parsedUrl.protocol !== 'http:' && parsedUrl.protocol !== 'https:') {
-    console.log('Invalid protocol:', parsedUrl.protocol);
+    console.log('Bad protocol:', parsedUrl.protocol);
     return res.json({ error: 'invalid url' });
   }
 
-  // Get hostname for DNS lookup
-  const hostname = parsedUrl.hostname;
-  console.log('Looking up hostname:', hostname);
-
-  // DNS lookup to verify the domain exists
-  dns.lookup(hostname, (err, address) => {
+  // DNS lookup
+  dns.lookup(parsedUrl.hostname, (err, address) => {
     if (err) {
-      console.log('DNS lookup error:', err.message);
+      console.log('DNS error:', err.message);
       return res.json({ error: 'invalid url' });
     }
 
-    console.log('DNS resolved to:', address);
+    console.log('DNS resolved:', parsedUrl.hostname, '->', address);
 
-    // Read current database
-    const db = readDatabase();
-
-    // Check if URL already exists
-    const existingUrl = db.urls.find(item => item.original_url === originalUrl);
-    if (existingUrl) {
-      console.log('URL already exists:', existingUrl);
+    // Check if exists
+    const existing = urlDatabase.find(u => u.original_url === originalUrl);
+    if (existing) {
       return res.json({
-        original_url: existingUrl.original_url,
-        short_url: existingUrl.short_url
+        original_url: existing.original_url,
+        short_url: existing.short_url
       });
     }
 
-    // Create new short URL
-    db.counter += 1;
+    // Create new
+    counter++;
     const newEntry = {
       original_url: originalUrl,
-      short_url: db.counter
+      short_url: counter
     };
-    db.urls.push(newEntry);
+    urlDatabase.push(newEntry);
 
-    // Save to database
-    writeDatabase(db);
+    console.log('Created:', newEntry);
 
-    console.log('Created new short URL:', newEntry);
-
-    res.json({
+    return res.json({
       original_url: newEntry.original_url,
       short_url: newEntry.short_url
     });
   });
 });
 
-// API endpoint - Redirect to original URL (GET)
+// GET - Redirect
 app.get('/api/shorturl/:short_url', (req, res) => {
-  const shortUrlParam = req.params.short_url;
-  
-  console.log('Redirect request for:', shortUrlParam);
+  console.log('Redirect request:', req.params.short_url);
 
-  // Parse the short URL as integer
-  const shortUrl = parseInt(shortUrlParam, 10);
+  const shortUrl = parseInt(req.params.short_url, 10);
 
-  // Check if it's a valid number
   if (isNaN(shortUrl)) {
     return res.json({ error: 'Wrong format' });
   }
 
-  // Read database
-  const db = readDatabase();
+  const entry = urlDatabase.find(u => u.short_url === shortUrl);
 
-  // Find the URL entry
-  const urlEntry = db.urls.find(item => item.short_url === shortUrl);
-
-  if (!urlEntry) {
-    console.log('Short URL not found:', shortUrl);
-    return res.json({ error: 'No short URL found for the given input' });
+  if (!entry) {
+    console.log('Not found. Database:', urlDatabase);
+    return res.json({ error: 'No short URL found' });
   }
 
-  console.log('Redirecting to:', urlEntry.original_url);
-
-  // Redirect to original URL
-  res.redirect(urlEntry.original_url);
+  console.log('Redirecting to:', entry.original_url);
+  return res.redirect(entry.original_url);
 });
 
-// API endpoint - Get all URLs (for display)
+// GET - List URLs
 app.get('/api/urls', (req, res) => {
-  const db = readDatabase();
-  res.json(db.urls);
+  res.json(urlDatabase);
 });
 
-// Start server
+// Static files AFTER API routes
+app.use(express.static('public'));
+
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
 app.listen(PORT, () => {
-  console.log(`🚀 URL Shortener running on port ${PORT}`);
-  console.log(`📍 Local: http://localhost:${PORT}`);
+  console.log(`Server running on port ${PORT}`);
 });
