@@ -49,7 +49,7 @@
             <p>Select a file to analyze its metadata</p>
           </div>
 
-          <form id="upload-form" enctype="multipart/form-data" class="upload-form">
+          <form id="upload-form" action="/api/fileanalyse" method="POST" enctype="multipart/form-data" class="upload-form">
             <div class="file-input-wrapper">
               <input type="file" id="upfile" name="upfile" required>
               <div class="file-input-display" id="file-display">
