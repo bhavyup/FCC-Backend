@@ -644,10 +644,35 @@ body {
   color: var(--text-muted);
   font-size: 0.85rem;
   transition: color 0.2s;
+  flex: 1;
+}
+
+.nav-link:first-child {
+  justify-content: flex-end;
+}
+
+.nav-link:last-child {
+  justify-content: flex-start;
 }
 
 .nav-link:hover {
   color: var(--accent-cyan);
+  text-decoration: none;
+}
+
+.dashboard-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--accent-cyan);
+  font-size: 0.85rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.dashboard-link:hover {
+  color: #22d3ee;
   text-decoration: none;
 }
 
