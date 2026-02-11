@@ -5,7 +5,7 @@
 
 Upload files and extract metadata instantly.
 
-[Live API](https://fcc-file-metadata-xvgc.onrender.com) · [Dashboard](../../dashboard)
+[Live API](https://fcc-file-metadata-xvgc.onrender.com) · [Dashboard](https://bhavyup.github.io/FCC-Backend/)
 
 </div>
 

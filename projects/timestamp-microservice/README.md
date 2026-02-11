@@ -4,7 +4,7 @@
 
 Convert any date to Unix timestamp and UTC format instantly.
 
-[Live API](https://fcc-timestamp-microservice-6b1s.onrender.com) · [Dashboard](../../dashboard)
+[Live API](https://fcc-timestamp-microservice-6b1s.onrender.com) · [Dashboard](https://bhavyup.github.io/FCC-Backend/)
 
 </div>
 

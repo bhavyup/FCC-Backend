@@ -4,7 +4,7 @@
 
 Track users, log workouts, and retrieve exercise history.
 
-[Live API](https://fcc-exercise-tracker-rrfr.onrender.com) · [Dashboard](../../dashboard)
+[Live API](https://fcc-exercise-tracker-rrfr.onrender.com) · [Dashboard](https://bhavyup.github.io/FCC-Backend/)
 
 ![MongoDB](https://img.shields.io/badge/MongoDB-47A248?style=flat-square&logo=mongodb&logoColor=white)
 

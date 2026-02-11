@@ -4,7 +4,7 @@
 
 Shorten long URLs and track redirects.
 
-[Live API](https://fcc-url-shortener-2pdh.onrender.com) · [Dashboard](../../dashboard)
+[Live API](https://fcc-url-shortener-2pdh.onrender.com) · [Dashboard](https://bhavyup.github.io/FCC-Backend/)
 
 ![MongoDB](https://img.shields.io/badge/MongoDB-47A248?style=flat-square&logo=mongodb&logoColor=white)
 

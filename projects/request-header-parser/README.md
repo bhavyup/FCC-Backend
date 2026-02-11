@@ -4,7 +4,7 @@
 
 Extract client information from HTTP request headers.
 
-[Live API](https://fcc-header-parser-ap2o.onrender.com) · [Dashboard](../../dashboard)
+[Live API](https://fcc-header-parser-ap2o.onrender.com) · [Dashboard](https://bhavyup.github.io/FCC-Backend/)
 
 </div>
 

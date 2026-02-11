@@ -7,7 +7,7 @@
 
 A suite of production-ready REST APIs built for the freeCodeCamp Backend Certification.
 
-[Live Dashboard](https://bhavyup.github.io/FCC-Backend/) · [View APIs](#-projects) · [Tech Stack](#-built-with)
+[Live Dashboard](https://bhavyup.github.io/FCC-Backend/) · [View APIs](#-projects) · [Tech Stack](#️-built-with)
 
 ---
 
@@ -39,7 +39,7 @@ This repository contains **5 backend microservices** and a **unified dashboard**
 
 ---
 
-## 🚀 Projects
+## 🚀 Projects 
 
 | # | Project | Description | Live Demo | Status |
 |:-:|---------|-------------|:---------:|:------:|
