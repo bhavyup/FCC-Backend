@@ -1,131 +1,173 @@
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const dns = require('dns');
-const urlparser = require('url');
 const path = require('path');
-const fs = require('fs');
+const { MongoClient } = require('mongodb');
 
 const app = express();
 const PORT = process.env.PORT || 3002;
 
-// Database
-const DB_FILE = path.join(__dirname, 'data', 'urls.json');
+// MongoDB connection
+const MONGO_URI = process.env.MONGO_URI;
 
-function initDatabase() {
-  const dataDir = path.join(__dirname, 'data');
-  if (!fs.existsSync(dataDir)) {
-    fs.mkdirSync(dataDir, { recursive: true });
-  }
-  if (!fs.existsSync(DB_FILE)) {
-    fs.writeFileSync(DB_FILE, JSON.stringify({ urls: [], counter: 0 }));
-  }
+if (!MONGO_URI) {
+  console.error('❌ MONGO_URI is not defined in environment variables!');
+  process.exit(1);
 }
 
-function readDatabase() {
+let db;
+
+// Connect to MongoDB
+async function connectDB() {
   try {
-    return JSON.parse(fs.readFileSync(DB_FILE, 'utf8'));
-  } catch (e) {
-    return { urls: [], counter: 0 };
+    const client = new MongoClient(MONGO_URI);
+    await client.connect();
+    db = client.db('urlshortener');
+    console.log('✅ Connected to MongoDB Atlas');
+  } catch (error) {
+    console.error('❌ MongoDB connection error:', error.message);
+    process.exit(1);
   }
 }
 
-function writeDatabase(data) {
-  fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2));
-}
-
-initDatabase();
-
-// Enable ALL CORS
+// Middleware
 app.use(cors({
   origin: '*',
   methods: ['GET', 'POST', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true
 }));
-
-// Handle preflight
 app.options('*', cors());
-
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
 
+// Home route
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// POST
-app.post('/api/shorturl', (req, res) => {
-  const originalUrl = req.body.url;
-  console.log('POST:', originalUrl);
+// ============================================
+// URL SHORTENER ROUTES
+// ============================================
 
-  // 1. Validate format using the URL constructor
-  let parsedUrl;
+// POST /api/shorturl - Create short URL
+app.post('/api/shorturl', async (req, res) => {
   try {
-    parsedUrl = new URL(originalUrl);
-  } catch (err) {
-    return res.json({ error: 'invalid url' });
-  }
+    const originalUrl = req.body.url;
+    console.log('POST /api/shorturl:', originalUrl);
 
-  // 2. Validate Protocol (must be http or https)
-  if (parsedUrl.protocol !== 'http:' && parsedUrl.protocol !== 'https:') {
-    return res.json({ error: 'invalid url' });
-  }
-
-  // 3. DNS Lookup to verify domain exists
-  dns.lookup(parsedUrl.hostname, (err, address) => {
-    // If err exists or address is missing, it's invalid
-    if (err || !address) {
+    // 1. Validate format using URL constructor
+    let parsedUrl;
+    try {
+      parsedUrl = new URL(originalUrl);
+    } catch (err) {
       return res.json({ error: 'invalid url' });
     }
 
-    const db = readDatabase();
-
-    // Check existing
-    const existing = db.urls.find(u => u.original_url === originalUrl);
-    if (existing) {
-      return res.json({
-        original_url: existing.original_url,
-        short_url: existing.short_url
-      });
+    // 2. Validate Protocol (must be http or https)
+    if (parsedUrl.protocol !== 'http:' && parsedUrl.protocol !== 'https:') {
+      return res.json({ error: 'invalid url' });
     }
 
-    // Create new
-    db.counter++;
-    const newEntry = {
-      original_url: originalUrl,
-      short_url: db.counter
-    };
-    db.urls.push(newEntry);
-    writeDatabase(db);
+    // 3. DNS Lookup to verify domain exists
+    dns.lookup(parsedUrl.hostname, async (err, address) => {
+      if (err || !address) {
+        console.log('DNS lookup failed for:', parsedUrl.hostname);
+        return res.json({ error: 'invalid url' });
+      }
 
-    res.json({
-      original_url: originalUrl,
-      short_url: db.counter
+      try {
+        // Check if URL already exists
+        const existing = await db.collection('urls').findOne({ original_url: originalUrl });
+        if (existing) {
+          return res.json({
+            original_url: existing.original_url,
+            short_url: existing.short_url
+          });
+        }
+
+        // Get next counter value
+        const counterDoc = await db.collection('counters').findOneAndUpdate(
+          { _id: 'url_counter' },
+          { $inc: { count: 1 } },
+          { upsert: true, returnDocument: 'after' }
+        );
+
+        const shortUrl = counterDoc.count;
+
+        // Create new URL entry
+        const newEntry = {
+          original_url: originalUrl,
+          short_url: shortUrl
+        };
+
+        await db.collection('urls').insertOne(newEntry);
+
+        console.log('Created:', newEntry);
+
+        res.json({
+          original_url: originalUrl,
+          short_url: shortUrl
+        });
+      } catch (dbError) {
+        console.error('Database error:', dbError);
+        res.json({ error: 'Server error' });
+      }
     });
-  });
-});
-
-// GET - Redirect with explicit headers
-app.get('/api/shorturl/:short_url', (req, res) => {
-  const shorturl = req.params.short_url;
-  const db = readDatabase();
-  
-  // Ensure we compare numbers to numbers (your JSON stores short_url as number)
-  const urlDoc = db.urls.find(u => u.short_url === Number(shorturl));
-
-  if (!urlDoc) {
-    return res.json({ error: 'No short URL found' });
+  } catch (error) {
+    console.error('Error:', error);
+    res.json({ error: 'Server error' });
   }
-
-  // Express handles the headers and status code automatically
-  res.redirect(urlDoc.original_url); 
 });
 
-app.get('/api/urls', (req, res) => {
-  res.json(readDatabase());
+// GET /api/shorturl/:short_url - Redirect to original URL
+app.get('/api/shorturl/:short_url', async (req, res) => {
+  try {
+    const shorturl = req.params.short_url;
+    console.log('GET /api/shorturl/', shorturl);
+
+    // Find URL in database
+    const urlDoc = await db.collection('urls').findOne({ short_url: parseInt(shorturl) });
+
+    if (!urlDoc) {
+      return res.json({ error: 'No short URL found' });
+    }
+
+    console.log('Redirecting to:', urlDoc.original_url);
+    res.redirect(urlDoc.original_url);
+  } catch (error) {
+    console.error('Error:', error);
+    res.json({ error: 'Server error' });
+  }
 });
 
-app.listen(PORT, () => {
-  console.log('Server running on port', PORT);
+// GET /api/urls - Get all URLs (for debugging)
+app.get('/api/urls', async (req, res) => {
+  try {
+    const urls = await db.collection('urls').find({}).toArray();
+    const counter = await db.collection('counters').findOne({ _id: 'url_counter' });
+    res.json({ 
+      count: urls.length,
+      counter: counter ? counter.count : 0,
+      urls 
+    });
+  } catch (error) {
+    res.json({ error: error.message });
+  }
+});
+
+// Health check
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'OK', db: db ? 'connected' : 'disconnected' });
+});
+
+// Start server after DB connection
+connectDB().then(() => {
+  app.listen(PORT, () => {
+    console.log(`🚀 URL Shortener running on port ${PORT}`);
+  });
+}).catch(err => {
+  console.error('Failed to start server:', err);
 });

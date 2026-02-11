@@ -32,7 +32,6 @@ urlForm.addEventListener('submit', async (e) => {
   submitBtn.innerHTML = '<i class="fas fa-spinner"></i><span>Shortening...</span>';
   
   try {
-    // Use URLSearchParams to send as application/x-www-form-urlencoded
     const formData = new URLSearchParams();
     formData.append('url', url);
 
@@ -98,9 +97,12 @@ urlForm.addEventListener('submit', async (e) => {
 async function fetchUrls() {
   try {
     const response = await fetch('/api/urls');
-    const urls = await response.json();
+    const data = await response.json();
     
-    if (urls.length === 0) {
+    // Handle both old format (array) and new format ({ urls: [] })
+    const urls = Array.isArray(data) ? data : (data.urls || []);
+    
+    if (!urls || urls.length === 0) {
       urlsList.innerHTML = `
         <div class="empty-state">
           <i class="fas fa-link-slash"></i>
@@ -142,6 +144,12 @@ async function fetchUrls() {
     
   } catch (error) {
     console.error('Error fetching URLs:', error);
+    urlsList.innerHTML = `
+      <div class="empty-state">
+        <i class="fas fa-exclamation-triangle"></i>
+        <p>Error loading URLs</p>
+      </div>
+    `;
   }
 }
 
@@ -164,27 +172,33 @@ function copyToClipboard(text, button) {
 }
 
 // Copy short URL button
-copyShortUrlBtn.addEventListener('click', function() {
-  const url = shortUrlLink.href;
-  copyToClipboard(url, this);
-});
+if (copyShortUrlBtn) {
+  copyShortUrlBtn.addEventListener('click', function() {
+    const url = shortUrlLink.href;
+    copyToClipboard(url, this);
+  });
+}
 
 // Copy JSON button
-copyJsonBtn.addEventListener('click', function() {
-  const json = jsonOutput.textContent;
-  copyToClipboard(json, this);
-});
+if (copyJsonBtn) {
+  copyJsonBtn.addEventListener('click', function() {
+    const json = jsonOutput.textContent;
+    copyToClipboard(json, this);
+  });
+}
 
 // ============================================
 // REFRESH BUTTON
 // ============================================
-refreshBtn.addEventListener('click', function() {
-  this.style.transform = 'rotate(360deg)';
-  fetchUrls();
-  setTimeout(() => {
-    this.style.transform = 'rotate(0deg)';
-  }, 500);
-});
+if (refreshBtn) {
+  refreshBtn.addEventListener('click', function() {
+    this.style.transform = 'rotate(360deg)';
+    fetchUrls();
+    setTimeout(() => {
+      this.style.transform = 'rotate(0deg)';
+    }, 500);
+  });
+}
 
 // ============================================
 // INITIALIZE
