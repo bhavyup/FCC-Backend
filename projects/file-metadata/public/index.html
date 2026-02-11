@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>File Metadata | FCC Backend</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Animated Background -->
+    <div class="bg-animation">
+      <div class="floating-shapes">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+        <div class="shape shape-3"></div>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Hero Section -->
+      <section class="hero">
+        <div class="hero-badge">
+          <i class="fas fa-certificate"></i>
+          FreeCodeCamp Backend Certification
+        </div>
+        <h1 class="hero-title">
+          <span class="gradient-text">File Metadata</span>
+          <span class="subtitle">Microservice</span>
+        </h1>
+        <p class="hero-description">
+          Upload any file and instantly get its metadata including name, type, and size.
+        </p>
+      </section>
+
+      <!-- Upload Section -->
+      <section class="upload-section">
+        <div class="upload-card">
+          <div class="card-header">
+            <div class="card-icon">
+              <i class="fas fa-cloud-upload-alt"></i>
+            </div>
+            <h2>Upload a File</h2>
+            <p>Select a file to analyze its metadata</p>
+          </div>
+
+          <form id="upload-form" enctype="multipart/form-data" class="upload-form">
+            <div class="file-input-wrapper">
+              <input type="file" id="upfile" name="upfile" required>
+              <div class="file-input-display" id="file-display">
+                <i class="fas fa-file-upload"></i>
+                <span>Choose a file or drag it here</span>
+                <small>Max file size: 10MB</small>
+              </div>
+            </div>
+            
+            <div class="selected-file" id="selected-file" style="display: none;">
+              <div class="file-icon">
+                <i class="fas fa-file"></i>
+              </div>
+              <div class="file-info">
+                <span class="file-name" id="file-name">-</span>
+                <span class="file-size" id="file-size">-</span>
+              </div>
+              <button type="button" class="remove-file" id="remove-file">
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+
+            <button type="submit" class="btn-upload" id="submit-btn">
+              <i class="fas fa-search"></i>
+              <span>Analyze File</span>
+            </button>
+          </form>
+
+          <!-- Result Section -->
+          <div class="result-section" id="result-section" style="display: none;">
+            <div class="result-header">
+              <i class="fas fa-check-circle"></i>
+              <span>File Metadata</span>
+            </div>
+            <div class="result-grid">
+              <div class="result-item">
+                <div class="result-label">File Name</div>
+                <div class="result-value" id="result-name">-</div>
+              </div>
+              <div class="result-item">
+                <div class="result-label">MIME Type</div>
+                <div class="result-value" id="result-type">-</div>
+              </div>
+              <div class="result-item">
+                <div class="result-label">Size (bytes)</div>
+                <div class="result-value" id="result-size">-</div>
+              </div>
+            </div>
+            <div class="json-response">
+              <div class="json-header">
+                <span><i class="fas fa-code"></i> JSON Response</span>
+                <button class="copy-btn" id="copy-json">
+                  <i class="fas fa-copy"></i> Copy
+                </button>
+              </div>
+              <pre id="json-output"></pre>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- API Documentation -->
+      <section class="docs-section">
+        <h2 class="section-title"><i class="fas fa-book"></i> API Documentation</h2>
+        
+        <div class="doc-card">
+          <div class="doc-header">
+            <span class="method-badge post">POST</span>
+            <code>/api/fileanalyse</code>
+          </div>
+          <p class="doc-description">
+            Upload a file using multipart/form-data. The file input field must have the name <code>upfile</code>.
+          </p>
+          <div class="doc-example">
+            <div class="example-label">Example Response:</div>
+            <pre>{
+  "name": "example.png",
+  "type": "image/png",
+  "size": 12345
+}</pre>
+          </div>
+        </div>
+
+        <!-- HTML Form Example -->
+        <div class="doc-card">
+          <div class="doc-header">
+            <span class="method-badge html">HTML</span>
+            <code>Form Example</code>
+          </div>
+          <div class="doc-example">
+            <div class="example-label">HTML Form:</div>
+            <pre>&lt;form action="/api/fileanalyse" method="POST" enctype="multipart/form-data"&gt;
+  &lt;input type="file" name="upfile" /&gt;
+  &lt;button type="submit"&gt;Upload&lt;/button&gt;
+&lt;/form&gt;</pre>
+          </div>
+        </div>
+      </section>
+
+      <!-- Footer -->
+      <footer class="footer">
+        <p>
+          <i class="fas fa-code"></i>
+          Built for <a href="https://freecodecamp.org" target="_blank">freeCodeCamp</a> Backend Certification
+        </p>
+      </footer>
+    </main>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

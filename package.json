@@ -10,7 +10,9 @@
     "start:url-shortener": "cd projects/url-shortener && npm start",
     "dev:url-shortener": "cd projects/url-shortener && npm run dev",
     "start:exercise-tracker": "cd projects/exercise-tracker && npm start",
-    "dev:exercise-tracker": "cd projects/exercise-tracker && npm run dev"
+    "dev:exercise-tracker": "cd projects/exercise-tracker && npm run dev",
+    "start:file-metadata": "cd projects/file-metadata && npm start",
+    "dev:file-metadata": "cd projects/file-metadata && npm run dev"
   },
   "author": "Bhavy Upreti",
   "license": "MIT"
