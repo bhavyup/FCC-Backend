@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Exercise Tracker | FCC Backend</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Animated Background -->
+    <div class="bg-animation">
+      <div class="floating-shapes">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+        <div class="shape shape-3"></div>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Hero Section -->
+      <section class="hero">
+        <div class="hero-badge">
+          <i class="fas fa-certificate"></i>
+          FreeCodeCamp Backend Certification
+        </div>
+        <h1 class="hero-title">
+          <span class="gradient-text">Exercise Tracker</span>
+          <span class="subtitle">Microservice API</span>
+        </h1>
+        <p class="hero-description">
+          Track workouts and monitor fitness progress. Create users, log exercises, 
+          and retrieve comprehensive workout history.
+        </p>
+      </section>
+
+      <!-- Forms Section -->
+      <section class="forms-section">
+        <div class="forms-grid">
+          <!-- Create User Form -->
+          <div class="form-card">
+            <div class="form-header">
+              <div class="form-icon">
+                <i class="fas fa-user-plus"></i>
+              </div>
+              <h2>Create User</h2>
+            </div>
+            <form id="user-form" class="api-form">
+              <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" placeholder="Enter username" required>
+              </div>
+              <button type="submit" class="btn-submit">
+                <i class="fas fa-plus"></i> Create User
+              </button>
+            </form>
+            <div class="result-box" id="user-result"></div>
+          </div>
+
+          <!-- Add Exercise Form -->
+          <div class="form-card">
+            <div class="form-header">
+              <div class="form-icon exercise">
+                <i class="fas fa-dumbbell"></i>
+              </div>
+              <h2>Add Exercise</h2>
+            </div>
+            <form id="exercise-form" class="api-form">
+              <div class="form-group">
+                <label for="uid">User ID</label>
+                <input type="text" id="uid" name="userId" placeholder="User ID" required>
+              </div>
+              <div class="form-group">
+                <label for="description">Description</label>
+                <input type="text" id="description" name="description" placeholder="e.g., Running, Push-ups" required>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="duration">Duration (min)</label>
+                  <input type="number" id="duration" name="duration" placeholder="30" required>
+                </div>
+                <div class="form-group">
+                  <label for="date">Date (optional)</label>
+                  <input type="date" id="date" name="date">
+                </div>
+              </div>
+              <button type="submit" class="btn-submit exercise">
+                <i class="fas fa-plus"></i> Add Exercise
+              </button>
+            </form>
+            <div class="result-box" id="exercise-result"></div>
+          </div>
+        </div>
+
+        <!-- Get Logs Form -->
+        <div class="form-card full-width">
+          <div class="form-header">
+            <div class="form-icon logs">
+              <i class="fas fa-list"></i>
+            </div>
+            <h2>Get Exercise Log</h2>
+          </div>
+          <form id="log-form" class="api-form horizontal">
+            <div class="form-group">
+              <label for="log-uid">User ID</label>
+              <input type="text" id="log-uid" name="userId" placeholder="User ID" required>
+            </div>
+            <div class="form-group">
+              <label for="from">From</label>
+              <input type="date" id="from" name="from">
+            </div>
+            <div class="form-group">
+              <label for="to">To</label>
+              <input type="date" id="to" name="to">
+            </div>
+            <div class="form-group">
+              <label for="limit">Limit</label>
+              <input type="number" id="limit" name="limit" placeholder="10">
+            </div>
+            <button type="submit" class="btn-submit logs">
+              <i class="fas fa-search"></i> Get Log
+            </button>
+          </form>
+          <div class="result-box" id="log-result"></div>
+        </div>
+      </section>
+
+      <!-- Users List -->
+      <section class="users-section">
+        <div class="section-header">
+          <h2><i class="fas fa-users"></i> All Users</h2>
+          <button class="refresh-btn" id="refresh-users">
+            <i class="fas fa-sync-alt"></i>
+          </button>
+        </div>
+        <div class="users-list" id="users-list">
+          <div class="empty-state">
+            <i class="fas fa-user-slash"></i>
+            <p>No users yet</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- API Documentation -->
+      <section class="docs-section">
+        <h2 class="section-title"><i class="fas fa-book"></i> API Endpoints</h2>
+        
+        <div class="docs-grid">
+          <div class="doc-card">
+            <div class="doc-header">
+              <span class="method-badge post">POST</span>
+              <code>/api/users</code>
+            </div>
+            <p>Create a new user with username</p>
+            <pre>{ "username": "john_doe" }</pre>
+          </div>
+
+          <div class="doc-card">
+            <div class="doc-header">
+              <span class="method-badge get">GET</span>
+              <code>/api/users</code>
+            </div>
+            <p>Get all users</p>
+            <pre>[{ "username": "john", "_id": "abc123" }]</pre>
+          </div>
+
+          <div class="doc-card">
+            <div class="doc-header">
+              <span class="method-badge post">POST</span>
+              <code>/api/users/:_id/exercises</code>
+            </div>
+            <p>Add exercise for a user</p>
+            <pre>{ "description": "Run", "duration": 30 }</pre>
+          </div>
+
+          <div class="doc-card">
+            <div class="doc-header">
+              <span class="method-badge get">GET</span>
+              <code>/api/users/:_id/logs</code>
+            </div>
+            <p>Get user's exercise log. Optional: from, to, limit</p>
+            <pre>?from=2023-01-01&to=2023-12-31&limit=10</pre>
+          </div>
+        </div>
+      </section>
+
+      <!-- Footer -->
+      <footer class="footer">
+        <p>
+          <i class="fas fa-code"></i>
+          Built for <a href="https://freecodecamp.org" target="_blank">freeCodeCamp</a> Backend Certification
+        </p>
+      </footer>
+    </main>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

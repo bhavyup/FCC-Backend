@@ -1,53 +1,88 @@
 const express = require('express');
 const cors = require('cors');
 const dns = require('dns');
+const urlparser = require('url');
 const path = require('path');
+const fs = require('fs');
 
 const app = express();
 const PORT = process.env.PORT || 3002;
 
-// In-memory database
-let urlDatabase = [];
-let counter = 0;
+// Database
+const DB_FILE = path.join(__dirname, 'data', 'urls.json');
 
-// Middleware
-app.use(cors({ optionsSuccessStatus: 200 }));
+function initDatabase() {
+  const dataDir = path.join(__dirname, 'data');
+  if (!fs.existsSync(dataDir)) {
+    fs.mkdirSync(dataDir, { recursive: true });
+  }
+  if (!fs.existsSync(DB_FILE)) {
+    fs.writeFileSync(DB_FILE, JSON.stringify({ urls: [], counter: 0 }));
+  }
+}
+
+function readDatabase() {
+  try {
+    return JSON.parse(fs.readFileSync(DB_FILE, 'utf8'));
+  } catch (e) {
+    return { urls: [], counter: 0 };
+  }
+}
+
+function writeDatabase(data) {
+  fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2));
+}
+
+initDatabase();
+
+// Enable ALL CORS
+app.use(cors({
+  origin: '*',
+  methods: ['GET', 'POST', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
+}));
+
+// Handle preflight
+app.options('*', cors());
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(express.static('public'));
 
-// POST - Create short URL
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+// POST
 app.post('/api/shorturl', (req, res) => {
   const originalUrl = req.body.url;
+  console.log('POST:', originalUrl);
 
-  console.log('Received URL:', originalUrl);
-
-  if (!originalUrl) {
-    return res.json({ error: 'invalid url' });
-  }
-
+  // 1. Validate format using the URL constructor
   let parsedUrl;
   try {
     parsedUrl = new URL(originalUrl);
-  } catch (e) {
-    console.log('Parse error:', e.message);
+  } catch (err) {
     return res.json({ error: 'invalid url' });
   }
 
+  // 2. Validate Protocol (must be http or https)
   if (parsedUrl.protocol !== 'http:' && parsedUrl.protocol !== 'https:') {
-    console.log('Bad protocol:', parsedUrl.protocol);
     return res.json({ error: 'invalid url' });
   }
 
+  // 3. DNS Lookup to verify domain exists
   dns.lookup(parsedUrl.hostname, (err, address) => {
-    if (err) {
-      console.log('DNS error:', err.message);
+    // If err exists or address is missing, it's invalid
+    if (err || !address) {
       return res.json({ error: 'invalid url' });
     }
 
-    console.log('DNS resolved:', parsedUrl.hostname, '->', address);
+    const db = readDatabase();
 
-    // Check if exists
-    const existing = urlDatabase.find(u => u.original_url === originalUrl);
+    // Check existing
+    const existing = db.urls.find(u => u.original_url === originalUrl);
     if (existing) {
       return res.json({
         original_url: existing.original_url,
@@ -56,57 +91,41 @@ app.post('/api/shorturl', (req, res) => {
     }
 
     // Create new
-    counter++;
+    db.counter++;
     const newEntry = {
       original_url: originalUrl,
-      short_url: counter
+      short_url: db.counter
     };
-    urlDatabase.push(newEntry);
+    db.urls.push(newEntry);
+    writeDatabase(db);
 
-    console.log('Created:', newEntry);
-
-    return res.json({
-      original_url: newEntry.original_url,
-      short_url: newEntry.short_url
+    res.json({
+      original_url: originalUrl,
+      short_url: db.counter
     });
   });
 });
 
-// GET - Redirect
+// GET - Redirect with explicit headers
 app.get('/api/shorturl/:short_url', (req, res) => {
-  const param = req.params.short_url;
-  console.log('Redirect request:', param);
+  const shorturl = req.params.short_url;
+  const db = readDatabase();
+  
+  // Ensure we compare numbers to numbers (your JSON stores short_url as number)
+  const urlDoc = db.urls.find(u => u.short_url === Number(shorturl));
 
-  const shortUrl = parseInt(param, 10);
-
-  if (isNaN(shortUrl)) {
-    return res.json({ error: 'Wrong format' });
-  }
-
-  const entry = urlDatabase.find(u => u.short_url === shortUrl);
-
-  if (!entry) {
-    console.log('Not found. DB:', JSON.stringify(urlDatabase));
+  if (!urlDoc) {
     return res.json({ error: 'No short URL found' });
   }
 
-  console.log('Redirecting to:', entry.original_url);
-  res.redirect(entry.original_url);
+  // Express handles the headers and status code automatically
+  res.redirect(urlDoc.original_url); 
 });
 
-// GET - List URLs (for debugging)
 app.get('/api/urls', (req, res) => {
-  res.json({ count: urlDatabase.length, urls: urlDatabase });
-});
-
-// Static files
-app.use(express.static('public'));
-
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  res.json(readDatabase());
 });
 
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-  console.log('Database cleared - fresh start');
+  console.log('Server running on port', PORT);
 });
