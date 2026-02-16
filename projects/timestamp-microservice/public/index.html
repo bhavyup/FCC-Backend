@@ -1,218 +1,214 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Timestamp Microservice | FCC Backend</title>
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0%25' stop-color='%237c3aed'/%3E%3Cstop offset='100%25' stop-color='%232563eb'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='8' fill='url(%23g)'/%3E%3Ccircle cx='16' cy='16' r='9' fill='none' stroke='white' stroke-width='2'/%3E%3Cpath d='M16 10v6.5l4 3' fill='none' stroke='white' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E">
+  <meta name="description" content="Epoch — A precision timestamp conversion instrument for developers.">
+  <title>Epoch</title>
+
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23111110'/%3E%3Ccircle cx='16' cy='16' r='10' fill='none' stroke='%23c9a96e' stroke-width='1.5'/%3E%3Cline x1='16' y1='16' x2='16' y2='9' stroke='%23c9a96e' stroke-width='1.5' stroke-linecap='round'/%3E%3Cline x1='16' y1='16' x2='21' y2='18' stroke='%23e8e4de' stroke-width='1' stroke-linecap='round'/%3E%3Ccircle cx='16' cy='16' r='1.5' fill='%23c9a96e'/%3E%3C/svg%3E">
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500&family=Orbitron:wght@400;700&display=swap"
-    rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+
   <link rel="stylesheet" href="styles.css">
 </head>
-
 <body>
-  <div class="app-container">
-    <!-- Animated Background -->
-    <div class="bg-animation">
-      <div class="floating-shapes">
-        <div class="shape shape-1"></div>
-        <div class="shape shape-2"></div>
-        <div class="shape shape-3"></div>
+
+  <!-- Top Bar -->
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="topbar-brand">
+        <span class="brand-mark">E</span>
+        <span class="brand-name">Epoch</span>
       </div>
+      <nav class="topbar-nav">
+        <a href="#console">Console</a>
+        <a href="#reference">Reference</a>
+        <a href="/health" class="status-link">
+          <span class="pulse-dot"></span>
+          Live
+        </a>
+      </nav>
     </div>
+  </header>
 
-    <!-- Main Content -->
-    <main class="main-content">
-      <!-- Hero Section -->
-      <section class="hero">
-        <div class="hero-badge">
-          <i class="fas fa-certificate"></i>
-          FreeCodeCamp Backend Certification
+  <main>
+
+    <!-- Hero: The Clock -->
+    <section class="hero">
+      <div class="hero-inner">
+        
+        <!-- Analog Clock -->
+        <div class="clock-face">
+          <svg viewBox="0 0 200 200" class="clock-svg" id="analog-clock">
+            <!-- Outer ring -->
+            <circle cx="100" cy="100" r="95" fill="none" stroke="var(--border)" stroke-width="1"/>
+            <circle cx="100" cy="100" r="94" fill="none" stroke="var(--surface-2)" stroke-width="0.5"/>
+            
+            <!-- Hour markers -->
+            <g class="markers" stroke="var(--cream)" stroke-width="2" stroke-linecap="round">
+              <line x1="100" y1="10" x2="100" y2="22"/>   <!-- 12 -->
+              <line x1="145" y1="18.4" x2="139.5" y2="28.9"/><!-- 1 -->
+              <line x1="181.6" y1="55" x2="171.1" y2="60.5"/><!-- 2 -->
+              <line x1="190" y1="100" x2="178" y2="100"/>  <!-- 3 -->
+              <line x1="181.6" y1="145" x2="171.1" y2="139.5"/><!-- 4 -->
+              <line x1="145" y1="181.6" x2="139.5" y2="171.1"/><!-- 5 -->
+              <line x1="100" y1="190" x2="100" y2="178"/>  <!-- 6 -->
+              <line x1="55" y1="181.6" x2="60.5" y2="171.1"/><!-- 7 -->
+              <line x1="18.4" y1="145" x2="28.9" y2="139.5"/><!-- 8 -->
+              <line x1="10" y1="100" x2="22" y2="100"/>    <!-- 9 -->
+              <line x1="18.4" y1="55" x2="28.9" y2="60.5"/><!-- 10 -->
+              <line x1="55" y1="18.4" x2="60.5" y2="28.9"/><!-- 11 -->
+            </g>
+            
+            <!-- Minute ticks -->
+            <g class="minute-ticks" stroke="var(--muted)" stroke-width="0.5" stroke-linecap="round" id="minute-ticks"></g>
+
+            <!-- Hands -->
+            <line id="hour-hand" class="hand hand-hour" x1="100" y1="100" x2="100" y2="42" stroke="var(--cream)" stroke-width="3" stroke-linecap="round"/>
+            <line id="minute-hand" class="hand hand-minute" x1="100" y1="100" x2="100" y2="28" stroke="var(--cream)" stroke-width="2" stroke-linecap="round"/>
+            <line id="second-hand" class="hand hand-second" x1="100" y1="110" x2="100" y2="22" stroke="var(--gold)" stroke-width="1" stroke-linecap="round"/>
+            
+            <!-- Center cap -->
+            <circle cx="100" cy="100" r="4" fill="var(--gold)"/>
+            <circle cx="100" cy="100" r="2" fill="var(--bg)"/>
+          </svg>
         </div>
-        <h1 class="hero-title">
-          <span class="gradient-text">Timestamp</span>
-          <span class="subtitle">Microservice API</span>
-        </h1>
-        <p class="hero-description">
-          Convert dates to Unix timestamps and UTC format instantly.
-          A RESTful API built with Node.js and Express.
-        </p>
-      </section>
 
-      <!-- Live Clock -->
-      <section class="live-clock-section">
-        <div class="clock-card">
-          <div class="clock-header">
-            <i class="fas fa-clock"></i>
-            <span>Current Time</span>
-          </div>
-          <div class="clock-display">
-            <div class="time-value" id="current-time">--:--:--</div>
-            <div class="date-value" id="current-date">Loading...</div>
-          </div>
-          <div class="clock-footer">
-            <div class="timestamp-display">
-              <span class="label">Unix:</span>
-              <span class="value" id="current-unix">---</span>
+        <!-- Digital Readout -->
+        <div class="readout">
+          <div class="readout-time" id="readout-time">00:00:00</div>
+          <div class="readout-date" id="readout-date">— — —</div>
+          <div class="readout-grid">
+            <div class="readout-cell">
+              <span class="readout-label">Unix</span>
+              <span class="readout-value" id="readout-unix">—</span>
             </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- Interactive Tester -->
-      <section class="tester-section">
-        <div class="tester-card">
-          <div class="tester-header">
-            <h2><i class="fas fa-flask"></i> API Tester</h2>
-            <p>Try the API with different date formats</p>
-          </div>
-
-          <div class="tester-body">
-            <div class="input-group">
-              <label for="date-input">Enter a date or timestamp</label>
-              <div class="input-wrapper">
-                <input type="text" id="date-input" placeholder="e.g., 2015-12-25, 1451001600000, or leave empty">
-                <button id="test-btn" class="btn-primary">
-                  <i class="fas fa-paper-plane"></i>
-                  Test
-                </button>
-              </div>
-            </div>
-
-            <div class="quick-tests">
-              <span class="quick-label">Quick tests:</span>
-              <button class="quick-btn" data-value="">Now</button>
-              <button class="quick-btn" data-value="2015-12-25">2015-12-25</button>
-              <button class="quick-btn" data-value="1451001600000">Unix TS</button>
-              <button class="quick-btn" data-value="invalid-date">Invalid</button>
-            </div>
-
-            <div class="result-container" id="result-container">
-              <div class="result-header">
-                <span class="method-badge">GET</span>
-                <span class="endpoint" id="endpoint-display">/api</span>
-              </div>
-              <div class="result-body">
-                <pre id="result-output">// Response will appear here</pre>
-              </div>
+            <div class="readout-cell">
+              <span class="readout-label">UTC</span>
+              <span class="readout-value" id="readout-utc">—</span>
             </div>
           </div>
         </div>
-      </section>
 
-      <!-- API Documentation -->
-      <section class="docs-section">
-        <h2 class="section-title">
-          <i class="fas fa-book"></i>
-          API Documentation
-        </h2>
+      </div>
+      <p class="hero-tagline">Precision timestamp conversion instrument</p>
+    </section>
 
-        <div class="docs-grid">
-          <div class="doc-card">
-            <div class="doc-icon">
-              <i class="fas fa-calendar-check"></i>
-            </div>
-            <h3>Valid Date String</h3>
-            <div class="endpoint-example">
-              <code>GET /api/2015-12-25</code>
-            </div>
-            <div class="response-example">
-              <pre>{
-  "unix": 1451001600000,
-  "utc": "Fri, 25 Dec 2015 00:00:00 GMT"
-}</pre>
-            </div>
+    <!-- Divider -->
+    <div class="divider-line"></div>
+
+    <!-- Console Section -->
+    <section class="console-section" id="console">
+      <div class="section-label">Console</div>
+      
+      <div class="console">
+        <div class="console-bar">
+          <div class="console-dots">
+            <span></span><span></span><span></span>
           </div>
-
-          <div class="doc-card">
-            <div class="doc-icon">
-              <i class="fas fa-hashtag"></i>
-            </div>
-            <h3>Unix Timestamp</h3>
-            <div class="endpoint-example">
-              <code>GET /api/1451001600000</code>
-            </div>
-            <div class="response-example">
-              <pre>{
-  "unix": 1451001600000,
-  "utc": "Fri, 25 Dec 2015 00:00:00 GMT"
-}</pre>
-            </div>
-          </div>
-
-          <div class="doc-card">
-            <div class="doc-icon">
-              <i class="fas fa-clock"></i>
-            </div>
-            <h3>Current Time</h3>
-            <div class="endpoint-example">
-              <code>GET /api</code>
-            </div>
-            <div class="response-example">
-              <pre>{
-  "unix": [current timestamp],
-  "utc": "[current UTC time]"
-}</pre>
-            </div>
-          </div>
-
-          <div class="doc-card error">
-            <div class="doc-icon">
-              <i class="fas fa-exclamation-triangle"></i>
-            </div>
-            <h3>Invalid Date</h3>
-            <div class="endpoint-example">
-              <code>GET /api/invalid-date</code>
-            </div>
-            <div class="response-example">
-              <pre>{
-  "error": "Invalid Date"
-}</pre>
-            </div>
+          <div class="console-title">epoch — api tester</div>
+          <div class="console-actions">
+            <button class="copy-btn" id="copy-btn" title="Copy URL">
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                <rect x="5" y="5" width="9" height="9" rx="1.5" stroke="currentColor" stroke-width="1.2"/>
+                <path d="M3.5 11V3.5C3.5 2.67 4.17 2 5 2H10.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+              </svg>
+            </button>
           </div>
         </div>
-      </section>
 
-      <!-- Footer -->
-      <footer class="footer">
-        <div class="footer-content">
-          <p>
-            <i class="fas fa-code"></i>
-            Built for <a href="https://freecodecamp.org" target="_blank">freeCodeCamp</a>
-            Backend Certification
-          </p>
-          <div class="footer-links">
-            <a href="https://github.com/bhavyup/FCC-Backend/tree/main/projects/timestamp-microservice" target="_blank">
-              <i class="fab fa-github"></i>
-            </a>
-          </div>
-          <div class="project-nav">
-            <a href="https://fcc-file-metadata-xvgc.onrender.com/" class="nav-link">
-              <i class="fas fa-arrow-left"></i>
-              File Metadata
-            </a>
-            <span class="nav-divider">|</span>
-            <a href="https://bhavyup.github.io/FCC-Backend/" class="dashboard-link">
-              <i class="fas fa-rotate-left"></i>
-              Dashboard
-            </a>
-            <span class="nav-divider">|</span>
-            <a href="https://fcc-header-parser-ap2o.onrender.com/" class="nav-link">
-              Request Header Parser
-              <i class="fas fa-arrow-right"></i>
-            </a>
-          </div>
+        <div class="console-input-row">
+          <span class="console-prompt">$</span>
+          <span class="console-method">GET</span>
+          <span class="console-base">/api/</span>
+          <input type="text" id="date-input" class="console-input" placeholder="enter date, timestamp, or leave empty" spellcheck="false" autocomplete="off"/>
+          <button id="run-btn" class="run-btn">Run</button>
         </div>
-      </footer>
-    </main>
-  </div>
+
+        <div class="console-presets">
+          <button class="preset" data-value="">now</button>
+          <button class="preset" data-value="2024-12-25">2024-12-25</button>
+          <button class="preset" data-value="1704067200">unix (s)</button>
+          <button class="preset" data-value="1704067200000">unix (ms)</button>
+          <button class="preset" data-value="March 15, 2025">natural</button>
+          <button class="preset" data-value="not-a-date">invalid</button>
+        </div>
+
+        <div class="console-output" id="console-output">
+          <div class="output-line comment">// Hit Run or press Enter...</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Divider -->
+    <div class="divider-line"></div>
+
+    <!-- Reference Section -->
+    <section class="reference-section" id="reference">
+      <div class="section-label">Reference</div>
+
+      <div class="ref-block">
+        <div class="ref-header">
+          <span class="ref-method">GET</span>
+          <code class="ref-endpoint">/api</code>
+        </div>
+        <p class="ref-desc">Returns the current server time. No parameters required.</p>
+        <pre class="ref-code"><code><span class="key">"unix"</span>:      <span class="num">1739721600000</span>
+<span class="key">"utc"</span>:       <span class="str">"Sun, 16 Feb 2026 16:00:00 GMT"</span>
+<span class="key">"iso"</span>:       <span class="str">"2026-02-16T16:00:00.000Z"</span>
+<span class="key">"timestamp"</span>: <span class="num">1739721600</span></code></pre>
+      </div>
+
+      <div class="ref-block">
+        <div class="ref-header">
+          <span class="ref-method">GET</span>
+          <code class="ref-endpoint">/api/<span class="param">:date</span></code>
+        </div>
+        <p class="ref-desc">Converts any date input to structured timestamp output. Accepts ISO strings, Unix timestamps (milliseconds or seconds), and natural language dates.</p>
+        <div class="ref-examples">
+          <code>/api/2024-12-25</code>
+          <code>/api/1704067200000</code>
+          <code>/api/1704067200</code>
+          <code>/api/March%2015,%202025</code>
+        </div>
+      </div>
+
+      <div class="ref-block">
+        <div class="ref-header">
+          <span class="ref-method err">ERR</span>
+          <code class="ref-endpoint">Error Response</code>
+        </div>
+        <p class="ref-desc">Invalid inputs return a structured error with a hint for correction.</p>
+        <pre class="ref-code err"><code><span class="key">"error"</span>:   <span class="str">"Invalid Date"</span>
+<span class="key">"message"</span>: <span class="str">"Unable to parse the provided date format"</span>
+<span class="key">"hint"</span>:    <span class="str">"Try: ISO date, Unix timestamp, or natural language"</span></code></pre>
+      </div>
+
+      <div class="ref-block">
+        <div class="ref-header">
+          <span class="ref-method sys">SYS</span>
+          <code class="ref-endpoint">/health</code>
+        </div>
+        <p class="ref-desc">Returns service status, uptime, and environment. Use for monitoring.</p>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <span class="footer-left">Epoch v2.0</span>
+      <span class="footer-center">Built for precision</span>
+      <span class="footer-right">
+        <a href="/api/docs">API Docs</a>
+      </span>
+    </div>
+  </footer>
 
   <script src="script.js"></script>
 </body>
-
 </html>

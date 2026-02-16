@@ -5,7 +5,7 @@
   "scripts": {
     "start:dashboard": "cd dashboard && npm start",
     "dev:dashboard": "cd dashboard && npm run dev",
-    "start:timestamp": "cd projects/timestamp-microservice && npm start",
+    "start:timestamp": "cd projects/timestamp-microservice && npm install && npm start",
     "dev:timestamp": "cd projects/timestamp-microservice && npm run dev",
     "start:header-parser": "cd projects/request-header-parser && npm start",
     "dev:header-parser": "cd projects/request-header-parser && npm run dev",
