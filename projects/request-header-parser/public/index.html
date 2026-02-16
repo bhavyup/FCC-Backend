@@ -4,211 +4,244 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Request Header Parser | FCC Backend</title>
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0%25' stop-color='%2306b6d4'/%3E%3Cstop offset='100%25' stop-color='%238b5cf6'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='8' fill='url(%23g)'/%3E%3Ccircle cx='16' cy='12' r='4' fill='none' stroke='white' stroke-width='2'/%3E%3Cpath d='M9 25c0-4 3-7 7-7s7 3 7 7' fill='none' stroke='white' stroke-width='2' stroke-linecap='round'/%3E%3Cpath d='M24 8l2 2-2 2' fill='none' stroke='white' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+    <meta name="description" content="Signal — Request identity instrument. HTTP header analysis service.">
+    <title>Signal — Request Identity Instrument</title>
+    <link rel="icon" type="image/svg+xml"
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='16' cy='16' r='14' fill='none' stroke='%23c9a96e' stroke-width='1.5'/><circle cx='16' cy='16' r='3' fill='%23c9a96e'/><line x1='16' y1='2' x2='16' y2='8' stroke='%23c9a96e' stroke-width='1' opacity='.4'/><line x1='16' y1='24' x2='16' y2='30' stroke='%23c9a96e' stroke-width='1' opacity='.4'/><line x1='2' y1='16' x2='8' y2='16' stroke='%23c9a96e' stroke-width='1' opacity='.4'/><line x1='24' y1='16' x2='30' y2='16' stroke='%23c9a96e' stroke-width='1' opacity='.4'/></svg>">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500&family=Orbitron:wght@400;700&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600&family=IBM+Plex+Mono:wght@300;400;500&display=swap"
         rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="styles.css">
 </head>
 
 <body>
-    <div class="app-container">
-        <!-- Animated Background -->
-        <div class="bg-animation">
-            <div class="floating-shapes">
-                <div class="shape shape-1"></div>
-                <div class="shape shape-2"></div>
-                <div class="shape shape-3"></div>
+
+    <!-- Grain overlay -->
+    <div class="grain" aria-hidden="true"></div>
+
+    <!-- Navigation -->
+    <nav class="nav">
+        <div class="nav-inner">
+            <a href="/" class="nav-brand">
+                <svg width="20" height="20" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="16" cy="16" r="14" stroke="currentColor" stroke-width="1.5" />
+                    <circle cx="16" cy="16" r="3" fill="currentColor" />
+                    <line x1="16" y1="2" x2="16" y2="8" stroke="currentColor" stroke-width="1" opacity=".4" />
+                    <line x1="16" y1="24" x2="16" y2="30" stroke="currentColor" stroke-width="1" opacity=".4" />
+                    <line x1="2" y1="16" x2="8" y2="16" stroke="currentColor" stroke-width="1" opacity=".4" />
+                    <line x1="24" y1="16" x2="30" y2="16" stroke="currentColor" stroke-width="1" opacity=".4" />
+                </svg>
+                <span>Signal</span>
+            </a>
+            <div class="nav-links">
+                <a href="#identity">Identity</a>
+                <a href="#reference">Reference</a>
+                <a href="/api/docs" class="nav-endpoint">/api/docs</a>
             </div>
-            <div class="grid-overlay"></div>
         </div>
+    </nav>
 
-        <!-- Main Content -->
-        <main class="main-content">
-            <!-- Hero Section -->
-            <section class="hero">
-                <div class="hero-badge">
-                    <i class="fas fa-certificate"></i>
-                    FreeCodeCamp Backend Certification
+    <main>
+
+        <!-- Hero — Radar Scan -->
+        <section class="hero">
+            <div class="hero-inner">
+                <div class="hero-text">
+                    <p class="hero-label">Request Identity Instrument</p>
+                    <h1>Signal</h1>
+                    <p class="hero-desc">Decodes your HTTP identity. One endpoint reads your IP address, preferred
+                        language, and client software from the request headers.</p>
                 </div>
-                <h1 class="hero-title">
-                    <span class="gradient-text">Request Header</span>
-                    <span class="subtitle">Parser Microservice</span>
-                </h1>
-                <p class="hero-description">
-                    Discover your digital fingerprint. This API reveals your IP address,
-                    preferred language, and browser information from HTTP headers.
-                </p>
-            </section>
+                <div class="hero-radar">
+                    <svg class="radar-svg" viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Concentric rings -->
+                        <circle cx="150" cy="150" r="140" class="radar-ring" />
+                        <circle cx="150" cy="150" r="105" class="radar-ring" />
+                        <circle cx="150" cy="150" r="70" class="radar-ring" />
+                        <circle cx="150" cy="150" r="35" class="radar-ring" />
+                        <!-- Cross hairs -->
+                        <line x1="150" y1="8" x2="150" y2="292" class="radar-cross" />
+                        <line x1="8" y1="150" x2="292" y2="150" class="radar-cross" />
+                        <!-- Diagonal guides -->
+                        <line x1="51" y1="51" x2="249" y2="249" class="radar-cross" style="opacity:0.15" />
+                        <line x1="249" y1="51" x2="51" y2="249" class="radar-cross" style="opacity:0.15" />
+                        <!-- Sweep line (animated) -->
+                        <line x1="150" y1="150" x2="150" y2="10" class="radar-sweep" id="radarSweep" />
+                        <!-- Center dot -->
+                        <circle cx="150" cy="150" r="4" class="radar-center" />
+                        <!-- Signal blips (placed by JS) -->
+                        <g id="radarBlips"></g>
+                        <!-- Tick marks around the perimeter -->
+                        <g id="radarTicks" class="radar-ticks"></g>
+                    </svg>
+                </div>
+            </div>
+        </section>
 
-            <!-- Your Info Card -->
-            <section class="info-section">
-                <div class="info-card">
-                    <div class="card-header">
-                        <div class="header-icon">
-                            <i class="fas fa-user-secret"></i>
-                        </div>
-                        <div class="header-text">
-                            <h2>Your Digital Identity</h2>
-                            <p>Information extracted from your request headers</p>
-                        </div>
-                        <button class="refresh-btn" id="refresh-btn">
-                            <i class="fas fa-sync-alt"></i>
-                        </button>
+        <!-- Identity Readout -->
+        <section class="identity" id="identity">
+            <div class="section-inner">
+                <div class="section-header">
+                    <span class="section-number">01</span>
+                    <h2>Identity Readout</h2>
+                </div>
+
+                <div class="readout-panel">
+                    <div class="readout-top-bar">
+                        <span class="readout-status" id="readoutStatus">standby</span>
+                        <span class="readout-endpoint">GET /api/whoami</span>
                     </div>
 
-                    <div class="info-grid" id="info-grid">
-                        <!-- IP Address -->
-                        <div class="info-item">
-                            <div class="info-icon ip">
-                                <i class="fas fa-network-wired"></i>
-                            </div>
-                            <div class="info-content">
-                                <span class="info-label">IP Address</span>
-                                <span class="info-value" id="ip-value">Loading...</span>
-                            </div>
-                            <div class="info-badge">ipaddress</div>
+                    <!-- Decoded fields -->
+                    <div class="readout-fields" id="readoutFields">
+                        <div class="readout-field">
+                            <div class="field-label">ip address</div>
+                            <div class="field-value" id="fieldIp">&mdash;</div>
                         </div>
-
-                        <!-- Language -->
-                        <div class="info-item">
-                            <div class="info-icon lang">
-                                <i class="fas fa-language"></i>
-                            </div>
-                            <div class="info-content">
-                                <span class="info-label">Preferred Language</span>
-                                <span class="info-value" id="lang-value">Loading...</span>
-                            </div>
-                            <div class="info-badge">language</div>
+                        <div class="readout-field">
+                            <div class="field-label">language</div>
+                            <div class="field-value field-value--wrap" id="fieldLang">&mdash;</div>
                         </div>
-
-                        <!-- Software -->
-                        <div class="info-item full-width">
-                            <div class="info-icon software">
-                                <i class="fas fa-laptop-code"></i>
-                            </div>
-                            <div class="info-content">
-                                <span class="info-label">Browser / Software</span>
-                                <span class="info-value software-value" id="software-value">Loading...</span>
-                            </div>
-                            <div class="info-badge">software</div>
+                        <div class="readout-field">
+                            <div class="field-label">software</div>
+                            <div class="field-value field-value--wrap" id="fieldSoftware">&mdash;</div>
                         </div>
                     </div>
 
                     <!-- Raw JSON -->
-                    <div class="raw-response">
-                        <div class="raw-header">
-                            <span><i class="fas fa-code"></i> Raw JSON Response</span>
-                            <button class="copy-btn" id="copy-btn">
-                                <i class="fas fa-copy"></i>
-                                Copy
-                            </button>
-                        </div>
-                        <pre id="raw-json">// Loading...</pre>
+                    <div class="readout-raw">
+                        <div class="readout-raw-label">raw response</div>
+                        <pre class="readout-json" id="readoutJson">{ }</pre>
+                    </div>
+
+                    <div class="readout-actions">
+                        <button class="btn btn--primary" id="btnScan">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path
+                                    d="M1 4v-1a2 2 0 0 1 2-2h3m14 0h3a2 2 0 0 1 2 2v1m0 16v1a2 2 0 0 1-2 2h-3M5 23H2a2 2 0 0 1-2-2v-1" />
+                                <circle cx="12" cy="12" r="4" />
+                            </svg>
+                            Scan Identity
+                        </button>
+                        <button class="btn btn--ghost" id="btnCopy" disabled>Copy JSON</button>
                     </div>
                 </div>
-            </section>
+            </div>
+        </section>
 
-            <!-- API Documentation -->
-            <section class="docs-section">
-                <h2 class="section-title">
-                    <i class="fas fa-book"></i>
-                    API Documentation
-                </h2>
-
-                <div class="docs-grid">
-                    <div class="doc-card main-endpoint">
-                        <div class="doc-header">
-                            <span class="method-badge get">GET</span>
-                            <code class="endpoint-url">/api/whoami</code>
+        <!-- Console Tester -->
+        <section class="console-section" id="console">
+            <div class="section-inner">
+                <div class="section-header">
+                    <span class="section-number">02</span>
+                    <h2>Console</h2>
+                </div>
+                <div class="console">
+                    <div class="console-bar">
+                        <div class="console-dots">
+                            <span></span><span></span><span></span>
                         </div>
-                        <p class="doc-description">
-                            Returns a JSON object containing your IP address, preferred language,
-                            and software (User-Agent) information extracted from request headers.
-                        </p>
-                        <div class="doc-example">
-                            <div class="example-label">Example Response:</div>
-                            <pre>{
-  "ipaddress": "159.20.14.100",
-  "language": "en-US,en;q=0.9",
-  "software": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)..."
-}</pre>
+                        <span class="console-title">signal &mdash; terminal</span>
+                    </div>
+                    <div class="console-body" id="consoleBody">
+                        <div class="console-line">
+                            <span class="console-prompt">$</span>
+                            <span class="console-text">curl <span class="console-url"
+                                    id="consoleUrl">/api/whoami</span></span>
                         </div>
                     </div>
-                </div>
-
-                <!-- Headers Explanation -->
-                <div class="headers-info">
-                    <h3><i class="fas fa-info-circle"></i> Understanding HTTP Headers</h3>
-                    <div class="headers-grid">
-                        <div class="header-item">
-                            <div class="header-name">X-Forwarded-For / IP</div>
-                            <p>Your public IP address, identifying your network location on the internet.</p>
-                        </div>
-                        <div class="header-item">
-                            <div class="header-name">Accept-Language</div>
-                            <p>Languages your browser prefers, helping servers deliver localized content.</p>
-                        </div>
-                        <div class="header-item">
-                            <div class="header-name">User-Agent</div>
-                            <p>Information about your browser, operating system, and device.</p>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Try It Section -->
-            <section class="try-section">
-                <div class="try-card">
-                    <h3><i class="fas fa-terminal"></i> Try with cURL</h3>
-                    <div class="curl-command">
-                        <code id="curl-command">curl <span class="url-placeholder">[your-url]</span>/api/whoami</code>
-                        <button class="copy-btn small" id="copy-curl">
-                            <i class="fas fa-copy"></i>
+                    <div class="console-input-row">
+                        <span class="console-prompt">$</span>
+                        <span class="console-text">curl&nbsp;</span>
+                        <input type="text" class="console-input" id="consoleInput" value="/api/whoami"
+                            spellcheck="false" autocomplete="off">
+                        <button class="console-run" id="btnRun" title="Execute">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                                <polygon points="5,3 19,12 5,21" />
+                            </svg>
                         </button>
                     </div>
                 </div>
-            </section>
+            </div>
+        </section>
 
-            <!-- Footer -->
-            <footer class="footer">
-                <div class="footer-content">
-                    <p>
-                        <i class="fas fa-code"></i>
-                        Built for <a href="https://freecodecamp.org" target="_blank">freeCodeCamp</a>
-                        Backend Certification
-                    </p>
-                    <div class="footer-links">
-                        <a href="https://github.com/bhavyup/FCC-Backend/tree/main/projects/request-header-parser"
-                            target="_blank">
-                            <i class="fab fa-github"></i>
-                        </a>
-                    </div>
-                    <div class="project-nav">
-                        <a href="https://fcc-timestamp-microservice-6b1s.onrender.com" class="nav-link">
-                            <i class="fas fa-arrow-left"></i>
-                            Timestamp Microservice
-                        </a>
-                        <span class="nav-divider">|</span>
-                        <a href="https://bhavyup.github.io/FCC-Backend/" class="dashboard-link">
-                            <i class="fas fa-rotate-left"></i>
-                            Dashboard
-                        </a>
-                        <span class="nav-divider">|</span>
-                        <a href="https://fcc-url-shortener-2pdh.onrender.com/" class="nav-link">
-                            URL Shortener
-                            <i class="fas fa-arrow-right"></i>
-                        </a>
-                    </div>
-
+        <!-- Reference -->
+        <section class="reference" id="reference">
+            <div class="section-inner">
+                <div class="section-header">
+                    <span class="section-number">03</span>
+                    <h2>Reference</h2>
                 </div>
-            </footer>
-        </main>
-    </div>
+
+                <div class="ref-block">
+                    <h3 class="ref-method">GET <span class="ref-path">/api/whoami</span></h3>
+                    <p class="ref-desc">Returns the client's identity as read from the HTTP request headers. No
+                        parameters required.</p>
+                    <div class="ref-code">
+                        <div class="ref-code-label">Response</div>
+                        <pre>{
+  "ipaddress": "159.20.14.100",
+  "language": "en-US,en;q=0.9,fr;q=0.8",
+  "software": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) ..."
+}</pre>
+                    </div>
+                    <div class="ref-fields">
+                        <div class="ref-field-row">
+                            <code>ipaddress</code>
+                            <span>Client IP address (respects X-Forwarded-For behind proxies)</span>
+                        </div>
+                        <div class="ref-field-row">
+                            <code>language</code>
+                            <span>Full Accept-Language header — browser language preferences</span>
+                        </div>
+                        <div class="ref-field-row">
+                            <code>software</code>
+                            <span>Full User-Agent string — OS, browser, and engine details</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="ref-block">
+                    <h3 class="ref-method">GET <span class="ref-path">/health</span></h3>
+                    <p class="ref-desc">Service health check. Returns uptime, status, and environment.</p>
+                    <div class="ref-code">
+                        <div class="ref-code-label">Response</div>
+                        <pre>{
+  "status": "operational",
+  "uptime": 3600.5,
+  "timestamp": 1708099200000,
+  "environment": "production"
+}</pre>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-inner">
+            <div class="footer-brand">
+                <svg width="20" height="20" viewBox="0 0 32 32" fill="none"
+                    xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="16" cy="16" r="14" stroke="currentColor" stroke-width="1.5" />
+                    <circle cx="16" cy="16" r="3" fill="currentColor" />
+                    <line x1="16" y1="2" x2="16" y2="8" stroke="currentColor" stroke-width="1" opacity=".4" />
+                    <line x1="16" y1="24" x2="16" y2="30" stroke="currentColor" stroke-width="1" opacity=".4" />
+                    <line x1="2" y1="16" x2="8" y2="16" stroke="currentColor" stroke-width="1" opacity=".4" />
+                    <line x1="24" y1="16" x2="30" y2="16" stroke="currentColor" stroke-width="1" opacity=".4" />
+                </svg>
+                <a href="https://github.com/bhavyup/FCC-Backend/tree/main/projects/request-header-parser"
+                    target="_blank">Signal v2.0.0</a>
+                </div>
+                <div class="footer-center">Built with care by <a href="https://bhavyupreti.me" target="_blank">Bhavy Upreti</a></div>
+            <a style="text-decoration: none;" href="/health" class="footer-meta"><div class="footer-dot"></div> Liveness</a>
+        </div>
+    </footer>
 
     <script src="script.js"></script>
 </body>

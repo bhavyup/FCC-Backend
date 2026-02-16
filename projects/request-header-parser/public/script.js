@@ -1,122 +1,206 @@
-// ============================================
-// FETCH USER INFO
-// ============================================
-async function fetchUserInfo() {
-  const ipValue = document.getElementById('ip-value');
-  const langValue = document.getElementById('lang-value');
-  const softwareValue = document.getElementById('software-value');
-  const rawJson = document.getElementById('raw-json');
-  
-  // Set loading state
-  ipValue.textContent = 'Loading...';
-  langValue.textContent = 'Loading...';
-  softwareValue.textContent = 'Loading...';
-  rawJson.textContent = '// Fetching data...';
-  
-  ipValue.classList.add('loading');
-  langValue.classList.add('loading');
-  softwareValue.classList.add('loading');
-  
-  try {
-    const response = await fetch('/api/whoami');
-    const data = await response.json();
-    
-    // Remove loading state
-    ipValue.classList.remove('loading');
-    langValue.classList.remove('loading');
-    softwareValue.classList.remove('loading');
-    
-    // Update values with animation
-    setTimeout(() => {
-      ipValue.textContent = data.ipaddress || 'Unknown';
-      ipValue.style.animation = 'fadeIn 0.3s ease';
-    }, 100);
-    
-    setTimeout(() => {
-      langValue.textContent = data.language || 'Unknown';
-      langValue.style.animation = 'fadeIn 0.3s ease';
-    }, 200);
-    
-    setTimeout(() => {
-      softwareValue.textContent = data.software || 'Unknown';
-      softwareValue.style.animation = 'fadeIn 0.3s ease';
-    }, 300);
-    
-    // Update raw JSON
-    setTimeout(() => {
-      rawJson.textContent = JSON.stringify(data, null, 2);
-      rawJson.style.animation = 'fadeIn 0.3s ease';
-    }, 400);
-    
-    // Update curl command with current URL
-    updateCurlCommand();
-    
-  } catch (error) {
-    ipValue.textContent = 'Error';
-    langValue.textContent = 'Error';
-    softwareValue.textContent = 'Error';
-    rawJson.textContent = `// Error: ${error.message}`;
-    
-    ipValue.classList.remove('loading');
-    langValue.classList.remove('loading');
-    softwareValue.classList.remove('loading');
-  }
-}
+/**
+ * Signal — Request Identity Instrument
+ * Client-side: radar animation, identity scan, terminal console.
+ */
+(function () {
+  'use strict';
 
-// ============================================
-// COPY FUNCTIONALITY
-// ============================================
-function copyToClipboard(text, button) {
-  navigator.clipboard.writeText(text).then(() => {
-    const originalContent = button.innerHTML;
-    button.innerHTML = '<i class="fas fa-check"></i> Copied!';
-    button.classList.add('copied');
-    
-    setTimeout(() => {
-      button.innerHTML = originalContent;
-      button.classList.remove('copied');
-    }, 2000);
-  }).catch(err => {
-    console.error('Failed to copy:', err);
+  // ============================================
+  // RADAR ANIMATION
+  // ============================================
+
+  const radarInit = () => {
+    const ticksGroup = document.getElementById('radarTicks');
+    const blipsGroup = document.getElementById('radarBlips');
+    if (!ticksGroup || !blipsGroup) return;
+
+    const cx = 150, cy = 150, r = 140;
+
+    // Generate perimeter tick marks (every 6 degrees)
+    for (let deg = 0; deg < 360; deg += 6) {
+      const rad = (deg * Math.PI) / 180;
+      const len = deg % 30 === 0 ? 8 : 4;
+      const x1 = cx + (r - len) * Math.sin(rad);
+      const y1 = cy - (r - len) * Math.cos(rad);
+      const x2 = cx + r * Math.sin(rad);
+      const y2 = cy - r * Math.cos(rad);
+
+      const tick = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      tick.setAttribute('x1', x1);
+      tick.setAttribute('y1', y1);
+      tick.setAttribute('x2', x2);
+      tick.setAttribute('y2', y2);
+      ticksGroup.appendChild(tick);
+    }
+
+    // Place decorative blips at fixed positions
+    const blipPositions = [
+      { angle: 42, dist: 85 },
+      { angle: 165, dist: 110 },
+      { angle: 260, dist: 60 },
+    ];
+
+    blipPositions.forEach(({ angle, dist }) => {
+      const rad = (angle * Math.PI) / 180;
+      const bx = cx + dist * Math.sin(rad);
+      const by = cy - dist * Math.cos(rad);
+
+      const blip = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      blip.setAttribute('cx', bx);
+      blip.setAttribute('cy', by);
+      blip.setAttribute('r', '3');
+      blip.classList.add('radar-blip');
+      blipsGroup.appendChild(blip);
+    });
+  };
+
+  // ============================================
+  // IDENTITY READOUT
+  // ============================================
+
+  const fieldIp = document.getElementById('fieldIp');
+  const fieldLang = document.getElementById('fieldLang');
+  const fieldSoftware = document.getElementById('fieldSoftware');
+  const readoutJson = document.getElementById('readoutJson');
+  const readoutStatus = document.getElementById('readoutStatus');
+  const btnScan = document.getElementById('btnScan');
+  const btnCopy = document.getElementById('btnCopy');
+
+  let lastResult = null;
+
+  const setStatus = (state, label) => {
+    readoutStatus.className = 'readout-status ' + state;
+    readoutStatus.textContent = label;
+  };
+
+  const highlightField = (el) => {
+    el.classList.add('highlight');
+    setTimeout(() => el.classList.remove('highlight'), 1200);
+  };
+
+  const scanIdentity = async () => {
+    setStatus('scanning', 'scanning');
+    btnScan.disabled = true;
+
+    try {
+      const res = await fetch('/api/whoami');
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+
+      lastResult = data;
+
+      // Populate fields with a staggered reveal
+      const fields = [
+        { el: fieldIp, val: data.ipaddress || '—' },
+        { el: fieldLang, val: data.language || '—' },
+        { el: fieldSoftware, val: data.software || '—' },
+      ];
+
+      fields.forEach(({ el, val }, i) => {
+        setTimeout(() => {
+          el.textContent = val;
+          highlightField(el);
+        }, i * 150);
+      });
+
+      // Show formatted JSON
+      readoutJson.textContent = JSON.stringify(data, null, 2);
+
+      setTimeout(() => {
+        setStatus('active', 'decoded');
+        btnCopy.disabled = false;
+      }, fields.length * 150);
+    } catch (err) {
+      setStatus('', 'error');
+      readoutJson.textContent = `Error: ${err.message}`;
+      fieldIp.textContent = '—';
+      fieldLang.textContent = '—';
+      fieldSoftware.textContent = '—';
+    } finally {
+      btnScan.disabled = false;
+    }
+  };
+
+  btnScan.addEventListener('click', scanIdentity);
+
+  // Copy JSON
+  btnCopy.addEventListener('click', () => {
+    if (!lastResult) return;
+    const text = JSON.stringify(lastResult, null, 2);
+    navigator.clipboard.writeText(text).then(() => {
+      const originalText = btnCopy.textContent;
+      btnCopy.textContent = 'Copied';
+      btnCopy.classList.add('btn--success');
+      setTimeout(() => {
+        btnCopy.textContent = originalText;
+        btnCopy.classList.remove('btn--success');
+      }, 1500);
+    });
   });
-}
 
-// Copy JSON button
-document.getElementById('copy-btn').addEventListener('click', function() {
-  const json = document.getElementById('raw-json').textContent;
-  copyToClipboard(json, this);
-});
+  // ============================================
+  // CONSOLE TESTER
+  // ============================================
 
-// Copy curl button
-document.getElementById('copy-curl').addEventListener('click', function() {
-  const curlCommand = `curl ${window.location.origin}/api/whoami`;
-  copyToClipboard(curlCommand, this);
-});
+  const consoleBody = document.getElementById('consoleBody');
+  const consoleInput = document.getElementById('consoleInput');
+  const btnRun = document.getElementById('btnRun');
 
-// ============================================
-// UPDATE CURL COMMAND
-// ============================================
-function updateCurlCommand() {
-  const curlCode = document.getElementById('curl-command');
-  curlCode.innerHTML = `curl <span class="url-placeholder">${window.location.origin}</span>/api/whoami`;
-}
+  const addConsoleLine = (type, content) => {
+    const line = document.createElement('div');
 
-// ============================================
-// REFRESH BUTTON
-// ============================================
-document.getElementById('refresh-btn').addEventListener('click', function() {
-  this.style.transform = 'rotate(360deg)';
-  fetchUserInfo();
-  
-  setTimeout(() => {
-    this.style.transform = 'rotate(0deg)';
-  }, 500);
-});
+    if (type === 'command') {
+      line.className = 'console-line';
+      line.innerHTML = `<span class="console-prompt">$</span><span class="console-text">curl <span class="console-url">${escapeHtml(content)}</span></span>`;
+    } else if (type === 'output') {
+      line.className = 'console-output';
+      line.textContent = content;
+    } else if (type === 'error') {
+      line.className = 'console-output console-error';
+      line.textContent = content;
+    }
 
-// ============================================
-// INITIALIZE
-// ============================================
-document.addEventListener('DOMContentLoaded', () => {
-  fetchUserInfo();
-  updateCurlCommand();
-});
+    consoleBody.appendChild(line);
+    consoleBody.scrollTop = consoleBody.scrollHeight;
+  };
+
+  const runConsoleCommand = async () => {
+    const endpoint = consoleInput.value.trim();
+    if (!endpoint) return;
+
+    addConsoleLine('command', endpoint);
+
+    try {
+      const res = await fetch(endpoint);
+      const data = await res.json();
+      addConsoleLine('output', JSON.stringify(data, null, 2));
+    } catch (err) {
+      addConsoleLine('error', `Error: ${err.message}`);
+    }
+  };
+
+  btnRun.addEventListener('click', runConsoleCommand);
+  consoleInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') runConsoleCommand();
+  });
+
+  // ============================================
+  // UTILITIES
+  // ============================================
+
+  const escapeHtml = (str) => {
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  };
+
+  // ============================================
+  // INIT
+  // ============================================
+
+  document.addEventListener('DOMContentLoaded', () => {
+    radarInit();
+    // Auto-scan on load
+    scanIdentity();
+  });
+})();

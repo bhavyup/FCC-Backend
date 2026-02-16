@@ -1,46 +1,163 @@
-// server.js
+/**
+ * Signal — Request Identity Instrument
+ * A production-grade HTTP header analysis microservice.
+ */
+
 const express = require('express');
 const cors = require('cors');
+const helmet = require('helmet');
+const morgan = require('morgan');
+const compression = require('compression');
+const rateLimit = require('express-rate-limit');
 const path = require('path');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
+const NODE_ENV = process.env.NODE_ENV || 'development';
 
-// Middleware
+// ============================================
+// SECURITY & MIDDLEWARE
+// ============================================
+
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://fonts.gstatic.com"],
+      styleSrcElem: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://fonts.gstatic.com"],
+      fontSrc: ["'self'", "https://fonts.gstatic.com"],
+      connectSrc: ["'self'", "*"],
+      scriptSrc: ["'self'", "https://cdn.freecodecamp.org"],
+      imgSrc: ["'self'", "data:", "https:"],
+    },
+  },
+}));
+
 app.use(cors({ optionsSuccessStatus: 200 }));
-app.use(express.static('public'));
+app.use(morgan(NODE_ENV === 'production' ? 'combined' : 'dev'));
+app.use(compression());
+app.use(express.json());
 
-// Trust proxy for getting real IP behind reverse proxies (Render, Heroku, etc.)
+// Trust proxy for accurate IP behind reverse proxies
 app.set('trust proxy', true);
 
-// Serve the main page
+// Rate limiting
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+  message: { error: 'Too many requests. Please try again later.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+app.use('/api', limiter);
+
+// Static files
+app.use(express.static(path.join(__dirname, 'public'), {
+  maxAge: NODE_ENV === 'production' ? '1d' : 0,
+  etag: true
+}));
+
+// ============================================
+// ROUTES
+// ============================================
+
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// API endpoint - Who Am I
-app.get('/api/whoami', (req, res) => {
-  // Get IP address
-  const ipaddress = req.ip || 
-                    req.headers['x-forwarded-for']?.split(',')[0].trim() || 
-                    req.connection.remoteAddress ||
-                    req.socket.remoteAddress;
-
-  // Get preferred language (first language in Accept-Language header)
-  const language = req.headers['accept-language'] || 'unknown';
-
-  // Get software (User-Agent header)
-  const software = req.headers['user-agent'] || 'unknown';
-
+// Health check
+app.get('/health', (req, res) => {
   res.json({
-    ipaddress: ipaddress,
-    language: language,
-    software: software
+    status: 'operational',
+    uptime: process.uptime(),
+    timestamp: Date.now(),
+    environment: NODE_ENV
   });
 });
 
-// Start server
-app.listen(PORT, () => {
-  console.log(`🚀 Request Header Parser running on port ${PORT}`);
-  console.log(`📍 Local: http://localhost:${PORT}`);
+// API documentation
+app.get('/api/docs', (req, res) => {
+  res.json({
+    name: 'Signal',
+    version: '2.0.0',
+    description: 'Request identity instrument — HTTP header analysis',
+    endpoints: {
+      'GET /api/whoami': {
+        description: 'Returns client identity from HTTP headers',
+        returns: {
+          ipaddress: 'Client IP address',
+          language: 'Accept-Language header value',
+          software: 'User-Agent header value'
+        }
+      },
+      'GET /health': {
+        description: 'Service health check'
+      }
+    },
+    rateLimit: '100 requests per 15 minutes'
+  });
+});
+
+// Core endpoint — client identity
+app.get('/api/whoami', (req, res) => {
+  try {
+    const ipaddress = req.ip ||
+      req.headers['x-forwarded-for']?.split(',')[0].trim() ||
+      req.connection.remoteAddress ||
+      req.socket.remoteAddress;
+
+    const language = req.headers['accept-language'] || 'unknown';
+    const software = req.headers['user-agent'] || 'unknown';
+
+    res.json({ ipaddress, language, software });
+  } catch (error) {
+    console.error('Error in /api/whoami:', error);
+    res.status(500).json({
+      error: 'Internal server error',
+      message: 'Failed to read request headers'
+    });
+  }
+});
+
+// 404 handler
+app.use((req, res) => {
+  res.status(404).json({
+    error: 'Not Found',
+    message: 'The requested endpoint does not exist',
+    availableEndpoints: ['/', '/api/whoami', '/api/docs', '/health']
+  });
+});
+
+// Global error handler
+app.use((err, req, res, next) => {
+  console.error('Unhandled error:', err);
+  res.status(err.status || 500).json({
+    error: 'Internal Server Error',
+    message: NODE_ENV === 'production'
+      ? 'An unexpected error occurred'
+      : err.message
+  });
+});
+
+// ============================================
+// SERVER INITIALIZATION
+// ============================================
+
+const server = app.listen(PORT, () => {
+  console.log('\n  ┌───────────────────────────────┐');
+  console.log('  │  Signal — Server Running       │');
+  console.log('  └───────────────────────────────┘\n');
+  console.log(`  Environment: ${NODE_ENV}`);
+  console.log(`  Port:        ${PORT}`);
+  console.log(`  URL:         http://localhost:${PORT}`);
+  console.log(`  Health:      http://localhost:${PORT}/health`);
+  console.log(`  API Docs:    http://localhost:${PORT}/api/docs\n`);
+});
+
+process.on('SIGTERM', () => {
+  console.log('\nSIGTERM received. Shutting down gracefully...');
+  server.close(() => {
+    console.log('Server closed');
+    process.exit(0);
+  });
 });

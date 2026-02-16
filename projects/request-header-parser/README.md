@@ -1,82 +1,76 @@
-<div align="center">
+# Signal
 
-# 👤 Request Header Parser
+Request identity instrument. Reads your IP address, preferred language, and client software from the HTTP request headers through a single endpoint.
 
-Extract client information from HTTP request headers.
+Built with Node.js and Express. Production-grade with security headers, rate limiting, compression, and structured logging.
 
-[Live API](https://fcc-header-parser-ap2o.onrender.com) · [Dashboard](https://bhavyup.github.io/FCC-Backend/)
+## API
 
-</div>
+Base URL: `http://req-head-parser.bhavyupreti.me`
 
----
+### `GET /api/whoami`
 
-## 📡 API Reference
-
-### Who Am I
-
-```http
-GET /api/whoami
-```
-
-### Response
+Returns the client's identity from the request headers.
 
 ```json
 {
   "ipaddress": "159.20.14.100",
-  "language": "en-US,en;q=0.9",
-  "software": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)..."
+  "language": "en-US,en;q=0.9,fr;q=0.8",
+  "software": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 ..."
 }
 ```
 
----
+| Field | Source |
+|-------|--------|
+| `ipaddress` | `req.ip` / `X-Forwarded-For` header |
+| `language` | `Accept-Language` header |
+| `software` | `User-Agent` header |
 
-## 🔍 Headers Parsed
+### `GET /health`
 
-| Header | Response Key | Description |
-|--------|--------------|-------------|
-| `X-Forwarded-For` | `ipaddress` | Client IP address |
-| `Accept-Language` | `language` | Preferred languages |
-| `User-Agent` | `software` | Browser/OS info |
+Service health check.
 
----
+### `GET /api/docs`
 
-## 🚀 Local Development
+Returns API documentation as JSON.
+
+## Stack
+
+- Express 4.18 with Helmet, Morgan, Compression, CORS
+- Rate limiting: 100 requests / 15 min per IP
+- Trust proxy enabled for accurate IP behind reverse proxies
+- Graceful shutdown on SIGTERM
+- Vanilla HTML/CSS/JS frontend with Space Grotesk + IBM Plex Mono
+
+## Setup
 
 ```bash
 cd projects/request-header-parser
 npm install
-npm run dev
+npm run dev     # development with nodemon
+npm start       # production
 ```
 
-Server runs at `http://localhost:3001`
+Server starts at `http://localhost:3001`.
 
----
+## Environment
 
-## 📁 Structure
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `PORT` | `3001` | Server port |
+| `NODE_ENV` | `development` | Environment mode |
 
-```
-request-header-parser/
-├── public/
-│   ├── index.html
-│   ├── styles.css
-│   └── script.js
-├── server.js
-└── package.json
-```
+## Deploy
 
----
-
-## 🧪 Test with cURL
+Includes `vercel.json` for Vercel deployment:
 
 ```bash
-curl https://your-api.com/api/whoami
+vercel deploy
 ```
 
----
+Works on any Node.js host (Render, Railway, Fly.io) with `npm start`.
 
-<div align="center">
+## License
 
-**Part of [API Hub](../../README.md)**
-
-</div>
+MIT
 
