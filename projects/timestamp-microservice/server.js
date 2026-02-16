@@ -28,8 +28,8 @@ app.use(helmet({
       styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://fonts.gstatic.com", "https://cdnjs.cloudflare.com"],
       styleSrcElem: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://fonts.gstatic.com", "https://cdnjs.cloudflare.com"],
       fontSrc: ["'self'", "https://fonts.gstatic.com", "https://cdnjs.cloudflare.com"],
-      connectSrc: ["'self'", "https://api.github.com"],
-      scriptSrc: ["'self'", "https://cdnjs.cloudflare.com", "https://freecodecamp.org"],
+      connectSrc: ["'self'", "https://api.github.com", "*"],
+      scriptSrc: ["'self'", "https://cdnjs.cloudflare.com", "https://freecodecamp.org", "https://cdn.freecodecamp.org", "unsafe-eval"],
       imgSrc: ["'self'", "data:", "https:"],
     },
   },
@@ -37,9 +37,9 @@ app.use(helmet({
 
 // CORS configuration
 app.use(cors({
-  origin: NODE_ENV === 'production' ? process.env.ALLOWED_ORIGINS?.split(',') : '*',
+  // origin: NODE_ENV === 'production' ? process.env.ALLOWED_ORIGINS?.split(',') : '*',
   optionsSuccessStatus: 200,
-  credentials: true
+  // credentials: true
 }));
 
 // Request logging
