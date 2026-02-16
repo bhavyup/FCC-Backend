@@ -52,7 +52,17 @@ body {
 }
 
 a { color: var(--sub); text-decoration: none; transition: color 0.2s; }
-a:hover { color: var(--gold); }
+a:hover { color: var(--gold); text-decoration: underline; }
+
+.thunderbolt {
+  color: var(--gold);
+  animation: flash 3s linear infinite;
+}
+
+@keyframes flash {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
 
 code { font-family: var(--mono); }
 
