@@ -23,6 +23,9 @@
 
   const BASE = window.location.origin;
 
+  // Derive mount prefix from pathname (works at / and /url-shortener/)
+  const mountPrefix = window.location.pathname.replace(/\/+$/, '');
+
   // State
   let isSubmitting = false;
 
@@ -33,7 +36,7 @@
   }
 
   function formatShortUrl(id) {
-    return `${BASE}/api/shorturl/${id}`;
+    return `${BASE}${mountPrefix}/api/shorturl/${id}`;
   }
 
   function setLoading(loading) {
@@ -132,7 +135,7 @@
     setLoading(true);
     
     try {
-      const res = await fetch('/api/shorturl', {
+      const res = await fetch(`${mountPrefix}/api/shorturl`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: new URLSearchParams({ url: rawUrl }),
@@ -160,7 +163,7 @@
 
   async function fetchKnots() {
     try {
-      const res = await fetch('/api/urls');
+      const res = await fetch(`${mountPrefix}/api/urls`);
       const data = await res.json();
       
       spoolCount.textContent = data.count || 0;
