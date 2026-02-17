@@ -114,7 +114,7 @@ class KineticApp {
     this.showLoading(this.userReceipt);
 
     try {
-      const response = await fetch("/api/users", {
+      const response = await fetch("api/users", {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: `username=${encodeURIComponent(username)}`,
@@ -163,7 +163,7 @@ class KineticApp {
     if (date) body += `&date=${date}`;
 
     try {
-      const response = await fetch(`/api/users/${userId}/exercises`, {
+      const response = await fetch(`api/users/${userId}/exercises`, {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: body,
@@ -202,7 +202,7 @@ class KineticApp {
 
     this.showLoading(this.logReceipt, true);
 
-    let url = `/api/users/${userId}/logs`;
+    let url = `api/users/${userId}/logs`;
     const params = new URLSearchParams();
     if (from) params.append("from", from);
     if (to) params.append("to", to);
@@ -230,7 +230,7 @@ class KineticApp {
       "transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)";
 
     try {
-      const response = await fetch("/api/users");
+      const response = await fetch("api/users");
       const users = await response.json();
       this.renderUsers(users);
     } catch (error) {
