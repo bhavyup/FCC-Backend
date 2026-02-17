@@ -123,12 +123,11 @@ class KineticApp {
       const data = await response.json();
 
       if (data.error) {
-        this.showReceipt(this.userReceipt, data.error, true);
+        this.showReceipt(this.userReceipt, formatErrorWithTimebar(data.error), true);
       } else if (data.existing) {
         this.showReceipt(this.userReceipt, this.formatExistingUserReceipt(data));
         this.exUserIdInput.value = data._id;
         this.logUserIdInput.value = data._id;
-        setTimeout(() => this.closeReceipt(this.userReceipt), 8000);
       } else {
         this.showReceipt(this.userReceipt, this.formatUserReceipt(data));
         this.usernameInput.value = "";
@@ -137,15 +136,15 @@ class KineticApp {
         // Auto-fill user ID in other forms
         this.exUserIdInput.value = data._id;
         this.logUserIdInput.value = data._id;
-        setTimeout(() => this.closeReceipt(this.userReceipt), 8000);
       }
     } catch (error) {
       this.showReceipt(
         this.userReceipt,
-        `Connection Error: ${error.message}`,
+        formatErrorWithTimebar(`Connection Error: ${error.message}`),
         true,
       );
     }
+    setTimeout(() => this.closeReceipt(this.userReceipt), 8000);
   }
 
   async handleExerciseSubmit(e) {
@@ -172,7 +171,7 @@ class KineticApp {
       const data = await response.json();
 
       if (data.error) {
-        this.showReceipt(this.exerciseReceipt, data.error, true);
+        this.showReceipt(this.exerciseReceipt, formatErrorWithTimebar(data.error), true);
       } else {
         this.showReceipt(
           this.exerciseReceipt,
@@ -181,14 +180,16 @@ class KineticApp {
         this.descriptionInput.value = "";
         this.durationInput.value = "";
         this.dateInput.value = "";
+
       }
     } catch (error) {
       this.showReceipt(
         this.exerciseReceipt,
-        `Connection Error: ${error.message}`,
+        formatErrorWithTimebar(`Connection Error: ${error.message}`),
         true,
       );
     }
+    setTimeout(() => this.closeReceipt(this.exerciseReceipt), 8000);
   }
 
   async handleLogSubmit(e) {
@@ -452,6 +453,7 @@ class KineticApp {
 
   formatExerciseReceipt(data) {
     return `
+            <div class="register-timebar"></div>
             <div style="font-weight: 600; margin-bottom: 8px;">Activity Logged</div>
             <div style="display: grid; gap: 4px;">
                 <div style="display: flex; justify-content: space-between;">
@@ -468,6 +470,13 @@ class KineticApp {
                 </div>
             </div>
         `;
+  }
+
+  formatErrorWithTimebar(error){
+    return `
+            <div class="register-timebar"></div>
+            <div style="color: #c00; padding: 20px 0;">${error}</div>
+    `;
   }
 
   copyToClipboard(text) {
