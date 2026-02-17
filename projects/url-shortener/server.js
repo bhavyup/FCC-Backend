@@ -18,6 +18,7 @@ const dnsLookup = promisify(dns.lookup);
 
 const app = express();
 const PORT = process.env.PORT || 3002;
+const router = express.Router();
 const NODE_ENV = process.env.NODE_ENV || "development";
 
 // ============================================
@@ -178,11 +179,8 @@ const limiter = rateLimit({
 });
 app.use("/api/", limiter);
 
-app.use(
-  express.static(path.join(__dirname, "public"), {
-    maxAge: NODE_ENV === "production" ? "1d" : 0,
-  }),
-);
+app.use(express.static(path.join(__dirname, "public")));
+app.use("/url-shortener", express.static(path.join(__dirname, "public")));
 
 // ============================================
 // VALIDATION
@@ -210,11 +208,11 @@ async function validateUrl(urlString) {
 // ROUTES
 // ============================================
 
-app.get("/", (req, res) => {
+router.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
-app.get("/health", (req, res) => {
+router.get("/health", (req, res) => {
   res.json({
     status: "operational",
     service: "knot",
@@ -224,7 +222,7 @@ app.get("/health", (req, res) => {
 });
 
 // fCC Test 2: POST /api/shorturl
-app.post("/api/shorturl", async (req, res) => {
+router.post("/api/shorturl", async (req, res) => {
   try {
     const originalUrl = req.body.url;
 
@@ -259,7 +257,7 @@ app.post("/api/shorturl", async (req, res) => {
 });
 
 // fCC Test 3: GET /api/shorturl/:id (redirect)
-app.get("/api/shorturl/:id", async (req, res) => {
+router.get("/api/shorturl/:id", async (req, res) => {
   try {
     const doc = await store.findByShort(req.params.id);
     if (!doc) {
@@ -272,7 +270,7 @@ app.get("/api/shorturl/:id", async (req, res) => {
   }
 });
 
-app.get("/api/urls", async (req, res) => {
+router.get("/api/urls", async (req, res) => {
   try {
     const urls = await store.list();
     const count = await store.count();
@@ -282,7 +280,7 @@ app.get("/api/urls", async (req, res) => {
   }
 });
 
-app.get("/api/docs", (req, res) => {
+router.get("/api/docs", (req, res) => {
   res.json({
     endpoints: {
       "GET /api/docs": "API documentation",
@@ -294,6 +292,9 @@ app.get("/api/docs", (req, res) => {
     rateLimit: "100 requests per 15 minutes",
   });
 });
+
+app.use("/", router);
+app.use("/url-shortener", router);
 
 app.use((req, res) => {
   res.status(404).json({ error: "Not found" });

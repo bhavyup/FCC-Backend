@@ -10,6 +10,11 @@
       "src": "projects/request-header-parser/server.js",
       "use": "@vercel/node",
       "config": { "includeFiles": ["projects/request-header-parser/public/**"] }
+    },
+    {
+        "src": "projects/url-shortener/server.js",
+        "use": "@vercel/node",
+        "config": { "includeFiles": ["projects/url-shortener/public/**"] }
     }
   ],
   "routes": [
@@ -28,6 +33,14 @@
     {
       "src": "/request-header-parser/(.*)",
       "dest": "/projects/request-header-parser/server.js"
+    },
+    {
+      "src": "/url-shortener",
+      "dest": "/projects/url-shortener/server.js"
+    },
+    {
+      "src": "/url-shortener/(.*)",
+      "dest": "/projects/url-shortener/server.js"
     }
   ]
 }
