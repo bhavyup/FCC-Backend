@@ -3,224 +3,247 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Exercise Tracker | FCC Backend</title>
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0%25' stop-color='%2310b981'/%3E%3Cstop offset='100%25' stop-color='%2306b6d4'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='8' fill='url(%23g)'/%3E%3Crect x='6' y='13' width='4' height='6' rx='1' fill='white'/%3E%3Crect x='22' y='13' width='4' height='6' rx='1' fill='white'/%3E%3Crect x='10' y='11' width='3' height='10' rx='1' fill='white'/%3E%3Crect x='19' y='11' width='3' height='10' rx='1' fill='white'/%3E%3Crect x='13' y='14.5' width='6' height='3' rx='1' fill='white'/%3E%3C/svg%3E">
+  <meta name="description" content="PULSE — Exercise tracking as living rhythm.">
+  <title>PULSE — Exercise Tracker</title>
+  
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
   <link rel="stylesheet" href="styles.css">
+<base target="_blank">
 </head>
 <body>
-  <div class="app-container">
-    <!-- Animated Background -->
-    <div class="bg-animation">
-      <div class="floating-shapes">
-        <div class="shape shape-1"></div>
-        <div class="shape shape-2"></div>
-        <div class="shape shape-3"></div>
+  <div class="app">
+    <!-- Scanlines overlay -->
+    <div class="scanlines"></div>
+    
+    <!-- Header -->
+    <header class="header">
+      <div class="brand">
+        <div class="pulse-dot"></div>
+        <span class="brand-text">PULSE</span>
       </div>
-    </div>
+      <div class="status">
+        <span class="status-indicator online"></span>
+        <span class="status-text">SIGNAL ACTIVE</span>
+      </div>
+    </header>
 
-    <!-- Main Content -->
-    <main class="main-content">
-      <!-- Hero Section -->
-      <section class="hero">
-        <div class="hero-badge">
-          <i class="fas fa-certificate"></i>
-          FreeCodeCamp Backend Certification
-        </div>
+    <!-- Hero: Live ECG -->
+    <section class="hero">
+      <canvas class="ecg-canvas" id="ecgCanvas"></canvas>
+      <div class="hero-overlay">
         <h1 class="hero-title">
-          <span class="gradient-text">Exercise Tracker</span>
-          <span class="subtitle">Microservice API</span>
+          <span class="title-main">Track your rhythm.</span>
+          <span class="title-sub">Every exercise is a heartbeat.</span>
         </h1>
-        <p class="hero-description">
-          Track workouts and monitor fitness progress. Create users, log exercises, 
-          and retrieve comprehensive workout history.
-        </p>
+      </div>
+    </section>
+
+    <!-- Main Interface -->
+    <main class="interface">
+      <!-- Signal Registration -->
+      <section class="panel">
+        <div class="panel-header">
+          <span class="panel-id">01</span>
+          <h2 class="panel-title">Register Signal</h2>
+        </div>
+        
+        <form class="signal-form" id="userForm">
+          <div class="input-field">
+            <label for="username">Username</label>
+            <input 
+              type="text" 
+              id="username" 
+              name="username" 
+              placeholder="enter_identifier..."
+              autocomplete="off"
+              required
+            >
+          </div>
+          <button type="submit" class="action-btn primary">
+            <span class="btn-text">Initialize</span>
+            <span class="btn-icon">→</span>
+          </button>
+        </form>
+
+        <div class="response" id="userResponse" hidden>
+          <div class="response-header">
+            <span class="response-status">OK</span>
+            <button class="response-close" id="closeUserResponse">×</button>
+          </div>
+          <pre class="response-body" id="userResponseBody"></pre>
+        </div>
       </section>
 
-      <!-- Forms Section -->
-      <section class="forms-section">
-        <div class="forms-grid">
-          <!-- Create User Form -->
-          <div class="form-card">
-            <div class="form-header">
-              <div class="form-icon">
-                <i class="fas fa-user-plus"></i>
-              </div>
-              <h2>Create User</h2>
-            </div>
-            <form id="user-form" class="api-form">
-              <div class="form-group">
-                <label for="username">Username</label>
-                <input type="text" id="username" name="username" placeholder="Enter username" required>
-              </div>
-              <button type="submit" class="btn-submit">
-                <i class="fas fa-plus"></i> Create User
-              </button>
-            </form>
-            <div class="result-box" id="user-result"></div>
-          </div>
-
-          <!-- Add Exercise Form -->
-          <div class="form-card">
-            <div class="form-header">
-              <div class="form-icon exercise">
-                <i class="fas fa-dumbbell"></i>
-              </div>
-              <h2>Add Exercise</h2>
-            </div>
-            <form id="exercise-form" class="api-form">
-              <div class="form-group">
-                <label for="uid">User ID</label>
-                <input type="text" id="uid" name="userId" placeholder="User ID" required>
-              </div>
-              <div class="form-group">
-                <label for="description">Description</label>
-                <input type="text" id="description" name="description" placeholder="e.g., Running, Push-ups" required>
-              </div>
-              <div class="form-row">
-                <div class="form-group">
-                  <label for="duration">Duration (min)</label>
-                  <input type="number" id="duration" name="duration" placeholder="30" required>
-                </div>
-                <div class="form-group">
-                  <label for="date">Date (optional)</label>
-                  <input type="date" id="date" name="date">
-                </div>
-              </div>
-              <button type="submit" class="btn-submit exercise">
-                <i class="fas fa-plus"></i> Add Exercise
-              </button>
-            </form>
-            <div class="result-box" id="exercise-result"></div>
-          </div>
+      <!-- Pulse Input -->
+      <section class="panel">
+        <div class="panel-header">
+          <span class="panel-id">02</span>
+          <h2 class="panel-title">Record Pulse</h2>
         </div>
-
-        <!-- Get Logs Form -->
-        <div class="form-card full-width">
-          <div class="form-header">
-            <div class="form-icon logs">
-              <i class="fas fa-list"></i>
+        
+        <form class="pulse-form" id="exerciseForm">
+          <div class="form-row">
+            <div class="input-field">
+              <label for="userId">Signal ID</label>
+              <input 
+                type="text" 
+                id="userId" 
+                name="userId" 
+                placeholder="_id..."
+                required
+              >
             </div>
-            <h2>Get Exercise Log</h2>
+            <div class="input-field">
+              <label for="duration">Duration (min)</label>
+              <input 
+                type="number" 
+                id="duration" 
+                name="duration" 
+                placeholder="30"
+                min="1"
+                required
+              >
+            </div>
           </div>
-          <form id="log-form" class="api-form horizontal">
-            <div class="form-group">
-              <label for="log-uid">User ID</label>
-              <input type="text" id="log-uid" name="userId" placeholder="User ID" required>
+          
+          <div class="input-field">
+            <label for="description">Activity</label>
+            <input 
+              type="text" 
+              id="description" 
+              name="description" 
+              placeholder="running, cycling, yoga..."
+              required
+            >
+          </div>
+          
+          <div class="input-field">
+            <label for="date">Timestamp <span class="optional">(optional)</span></label>
+            <input type="date" id="date" name="date">
+          </div>
+          
+          <button type="submit" class="action-btn secondary">
+            <span class="btn-text">Record Beat</span>
+            <span class="btn-icon">+</span>
+          </button>
+        </form>
+
+        <div class="response" id="exerciseResponse" hidden>
+          <div class="response-header">
+            <span class="response-status">OK</span>
+            <button class="response-close" id="closeExerciseResponse">×</button>
+          </div>
+          <pre class="response-body" id="exerciseResponseBody"></pre>
+        </div>
+      </section>
+
+      <!-- Signal Analysis -->
+      <section class="panel wide">
+        <div class="panel-header">
+          <span class="panel-id">03</span>
+          <h2 class="panel-title">Analyze Signal</h2>
+        </div>
+        
+        <form class="analysis-form" id="logForm">
+          <div class="analysis-inputs">
+            <div class="input-field">
+              <label for="logUserId">Signal ID</label>
+              <input 
+                type="text" 
+                id="logUserId" 
+                name="userId" 
+                placeholder="_id..."
+                required
+              >
             </div>
-            <div class="form-group">
-              <label for="from">From</label>
-              <input type="date" id="from" name="from">
+            <div class="input-field">
+              <label for="fromDate">From</label>
+              <input type="date" id="fromDate" name="from">
             </div>
-            <div class="form-group">
-              <label for="to">To</label>
-              <input type="date" id="to" name="to">
+            <div class="input-field">
+              <label for="toDate">To</label>
+              <input type="date" id="toDate" name="to">
             </div>
-            <div class="form-group">
+            <div class="input-field small">
               <label for="limit">Limit</label>
-              <input type="number" id="limit" name="limit" placeholder="10">
+              <input 
+                type="number" 
+                id="limit" 
+                name="limit" 
+                placeholder="∞"
+                min="1"
+              >
             </div>
-            <button type="submit" class="btn-submit logs">
-              <i class="fas fa-search"></i> Get Log
-            </button>
-          </form>
-          <div class="result-box" id="log-result"></div>
+          </div>
+          <button type="submit" class="action-btn tertiary">
+            <span class="btn-text">Generate Report</span>
+            <span class="btn-icon">⌘</span>
+          </button>
+        </form>
+
+        <div class="response large" id="logResponse" hidden>
+          <div class="response-header">
+            <span class="response-status">OK</span>
+            <div class="response-meta">
+              <span id="logCount">0 beats</span>
+            </div>
+            <button class="response-close" id="closeLogResponse">×</button>
+          </div>
+          <pre class="response-body" id="logResponseBody"></pre>
         </div>
       </section>
 
-      <!-- Users List -->
-      <section class="users-section">
-        <div class="section-header">
-          <h2><i class="fas fa-users"></i> All Users</h2>
-          <button class="refresh-btn" id="refresh-users">
-            <i class="fas fa-sync-alt"></i>
+      <!-- Active Signals -->
+      <section class="panel wide signals">
+        <div class="panel-header">
+          <span class="panel-id">04</span>
+          <h2 class="panel-title">Active Signals</h2>
+          <button class="refresh-btn" id="refreshSignals" title="Refresh">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M23 4v6h-6M1 20v-6h6"/>
+              <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/>
+            </svg>
           </button>
         </div>
-        <div class="users-list" id="users-list">
-          <div class="empty-state">
-            <i class="fas fa-user-slash"></i>
-            <p>No users yet</p>
-          </div>
-        </div>
-      </section>
-
-      <!-- API Documentation -->
-      <section class="docs-section">
-        <h2 class="section-title"><i class="fas fa-book"></i> API Endpoints</h2>
         
-        <div class="docs-grid">
-          <div class="doc-card">
-            <div class="doc-header">
-              <span class="method-badge post">POST</span>
-              <code>/api/users</code>
+        <div class="signals-grid" id="signalsGrid">
+          <div class="empty-signal">
+            <div class="empty-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+              </svg>
             </div>
-            <p>Create a new user with username</p>
-            <pre>{ "username": "john_doe" }</pre>
-          </div>
-
-          <div class="doc-card">
-            <div class="doc-header">
-              <span class="method-badge get">GET</span>
-              <code>/api/users</code>
-            </div>
-            <p>Get all users</p>
-            <pre>[{ "username": "john", "_id": "abc123" }]</pre>
-          </div>
-
-          <div class="doc-card">
-            <div class="doc-header">
-              <span class="method-badge post">POST</span>
-              <code>/api/users/:_id/exercises</code>
-            </div>
-            <p>Add exercise for a user</p>
-            <pre>{ "description": "Run", "duration": 30 }</pre>
-          </div>
-
-          <div class="doc-card">
-            <div class="doc-header">
-              <span class="method-badge get">GET</span>
-              <code>/api/users/:_id/logs</code>
-            </div>
-            <p>Get user's exercise log. Optional: from, to, limit</p>
-            <pre>?from=2023-01-01&to=2023-12-31&limit=10</pre>
+            <p>No active signals detected.</p>
+            <p class="empty-hint">Register a signal to begin tracking.</p>
           </div>
         </div>
       </section>
-
-      <!-- Footer -->
-      <footer class="footer">
-        <div class="footer-content">
-          <p>
-            <i class="fas fa-code"></i>
-            Built for <a href="https://freecodecamp.org" target="_blank">freeCodeCamp</a> Backend Certification
-          </p>
-          <div class="footer-links">
-            <a href="https://github.com/bhavyup/FCC-Backend/tree/main/projects/exercise-tracker" target="_blank">
-              <i class="fab fa-github"></i>
-            </a>
-          </div>
-          <div class="project-nav">
-            <a href="https://fcc-url-shortener-2pdh.onrender.com/" class="nav-link">
-              <i class="fas fa-arrow-left"></i>
-              URL Shortener
-            </a>
-            <span class="nav-divider">|</span>
-            <a href="https://bhavyup.github.io/FCC-Backend/" class="dashboard-link">
-              <i class="fas fa-rotate-left"></i>
-              Dashboard
-            </a>
-            <span class="nav-divider">|</span>
-            <a href="https://fcc-file-metadata-xvgc.onrender.com/" class="nav-link">
-              File Metadata
-              <i class="fas fa-arrow-right"></i>
-            </a>
-          </div>
-        </div>
-      </footer>
     </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <div class="footer-grid">
+        <div class="footer-section">
+          <span class="footer-label">System</span>
+          <span class="footer-value">PULSE v1.0.0</span>
+        </div>
+        <div class="footer-section">
+          <span class="footer-label">Protocol</span>
+          <span class="footer-value">HTTP/1.1</span>
+        </div>
+        <div class="footer-section">
+          <span class="footer-label">Encoding</span>
+          <span class="footer-value">UTF-8</span>
+        </div>
+        <div class="footer-section docs">
+          <a href="./api/users" class="footer-link">/api/users</a>
+          <a href="./health" class="footer-link">/health</a>
+        </div>
+      </div>
+    </footer>
   </div>
 
   <script src="script.js"></script>
