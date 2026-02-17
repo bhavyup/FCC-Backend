@@ -149,7 +149,7 @@
 
     // Request URL line
     const value = dateInput ? dateInput.value.trim() : "";
-    const endpoint = value ? `/api/${encodeURIComponent(value)}` : "/api";
+    const endpoint = value ? `/timestamp/api/${encodeURIComponent(value)}` : "/timestamp/api";
     addLine(`→ ${window.location.origin}${endpoint}`, "url");
     addLine("", "");
 
@@ -188,9 +188,9 @@
 
     let basePath = "api";
 
-    // If the URL does NOT end with a slash, we need to be explicit
-    // e.g. visiting /timestamp -> fetch('timestamp/api')
-    if (!window.location.href.endsWith("/")) {
+    // Use pathname (immune to #hash fragments and ?query strings)
+    // e.g. visiting /timestamp -> fetch('/api')
+    if (!window.location.pathname.endsWith("/")) {
       basePath = "/api";
     }
 
