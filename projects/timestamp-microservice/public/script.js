@@ -170,7 +170,7 @@
 
   async function runQuery() {
     const value = dateInput ? dateInput.value.trim() : '';
-    const endpoint = value ? `/api/${encodeURIComponent(value)}` : '/api';
+    const endpoint = value ? `api/${encodeURIComponent(value)}` : 'api';
 
     clearOutput();
     addLine('// Requesting...', 'comment');
