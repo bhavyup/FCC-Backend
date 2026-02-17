@@ -1,0 +1,33 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "projects/timestamp-microservice/server.js",
+      "use": "@vercel/node",
+      "config": { "includeFiles": ["projects/timestamp-microservice/public/**"] }
+    },
+    {
+      "src": "projects/request-header-parser/server.js",
+      "use": "@vercel/node",
+      "config": { "includeFiles": ["projects/request-header-parser/public/**"] }
+    }
+  ],
+  "routes": [
+    {
+      "src": "/timestamp",
+      "dest": "/projects/timestamp-microservice/server.js"
+    },
+    {
+      "src": "/timestamp/(.*)",
+      "dest": "/projects/timestamp-microservice/server.js"
+    },
+    {
+      "src": "/header-parser",
+      "dest": "/projects/request-header-parser/server.js"
+    },
+    {
+      "src": "/header-parser/(.*)",
+      "dest": "/projects/request-header-parser/server.js"
+    }
+  ]
+}
