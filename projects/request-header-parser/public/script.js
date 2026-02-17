@@ -144,6 +144,16 @@
   });
 
   // ============================================
+  // UTILITIES
+  // ============================================
+
+  const escapeHtml = (str) => {
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  };
+
+  // ============================================
   // CONSOLE TESTER
   // ============================================
 
@@ -173,15 +183,10 @@
     const endpoint = consoleInput.value.trim();
     if (!endpoint) return;
 
-    // Resolve relative to pathname, not href (immune to #hash)
-    const fetchUrl = endpoint.startsWith('http') || endpoint.startsWith('/')
-      ? endpoint
-      : `${basePath}/${endpoint.replace(/^\//, '')}`;
-
     addConsoleLine('command', endpoint);
 
     try {
-      const res = await fetch(fetchUrl);
+      const res = await fetch(endpoint);
       const data = await res.json();
       addConsoleLine('output', JSON.stringify(data, null, 2));
     } catch (err) {
@@ -195,22 +200,18 @@
   });
 
   // ============================================
-  // UTILITIES
-  // ============================================
-
-  const escapeHtml = (str) => {
-    const div = document.createElement('div');
-    div.textContent = str;
-    return div.innerHTML;
-  };
-
-  // ============================================
   // INIT
   // ============================================
 
-  document.addEventListener('DOMContentLoaded', () => {
+  const init = () => {
     radarInit();
-    // Auto-scan on load
     scanIdentity();
-  });
+  };
+
+  // Handle case where DOMContentLoaded already fired (script at end of body)
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
 })();
