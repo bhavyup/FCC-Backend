@@ -78,12 +78,17 @@
     setTimeout(() => el.classList.remove('highlight'), 1200);
   };
 
+  // Resolve base path from pathname (immune to #hash and ?query)
+  const basePath = window.location.pathname.endsWith('/')
+    ? 'api'
+    : '/api';
+
   const scanIdentity = async () => {
     setStatus('scanning', 'scanning');
     btnScan.disabled = true;
 
     try {
-      const res = await fetch('/api/whoami');
+      const res = await fetch(`${basePath}/whoami`);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
 
@@ -168,10 +173,15 @@
     const endpoint = consoleInput.value.trim();
     if (!endpoint) return;
 
+    // Resolve relative to pathname, not href (immune to #hash)
+    const fetchUrl = endpoint.startsWith('http') || endpoint.startsWith('/')
+      ? endpoint
+      : `${basePath}/${endpoint.replace(/^\//, '')}`;
+
     addConsoleLine('command', endpoint);
 
     try {
-      const res = await fetch(endpoint);
+      const res = await fetch(fetchUrl);
       const data = await res.json();
       addConsoleLine('output', JSON.stringify(data, null, 2));
     } catch (err) {
