@@ -55,6 +55,14 @@
     copyBtn.classList.remove('copied');
     copyBtn.querySelector('.copy-text').textContent = 'Copy';
     
+    // Restart timebar animation
+    const timebar = document.getElementById('resultTimebar');
+    timebar.classList.remove('active');
+    void timebar.offsetWidth;  // force reflow to restart animation
+    timebar.classList.add('active');
+
+    setTimeout(hideResults, 8000);
+    
     // Scroll to result on mobile
     if (window.innerWidth <= 900) {
       resultCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });

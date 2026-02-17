@@ -6,7 +6,7 @@ Built with Node.js and Express. Production-grade with security headers, rate lim
 
 ## API
 
-Base URL: `https://timestamp.bhavyupreti.me`
+Base URL: `http://timestamp.bhavyupreti.me`
 
 ### `GET /api`
 
