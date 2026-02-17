@@ -25,12 +25,13 @@ const PORT = process.env.PORT || 3003;
 const MONGO_URI = process.env.MONGO_URI;
 if (!MONGO_URI) {
     console.error('[FATAL] MONGO_URI environment variable required');
-    process.exit(1);
+    if (!process.env.VERCEL) process.exit(1);
 }
 
-// Database connection
+// Database connection (lazy, cached for serverless warm starts)
 let db = null;
 let client = null;
+let dbPromise = null;
 
 async function connectDatabase() {
     try {
@@ -51,8 +52,21 @@ async function connectDatabase() {
         return true;
     } catch (error) {
         console.error('[DB] Connection failed:', error.message);
+        dbPromise = null; // Allow retry on next request
         return false;
     }
+}
+
+// Lazy DB getter for serverless environments
+async function getDb() {
+    if (db) return db;
+    if (!MONGO_URI) throw new Error('MONGO_URI not configured');
+    if (!dbPromise) {
+        dbPromise = connectDatabase();
+    }
+    const connected = await dbPromise;
+    if (!connected || !db) throw new Error('Database connection failed');
+    return db;
 }
 
 // Middleware
@@ -79,12 +93,21 @@ app.use((req, res, next) => {
 // ============================================
 
 // Health check
-router.get('/api/health', (req, res) => {
-    res.json({ 
-        status: 'operational', 
-        database: db ? 'connected' : 'disconnected',
-        timestamp: new Date().toISOString()
-    });
+router.get('/api/health', async (req, res) => {
+    try {
+        const database = await getDb();
+        res.json({ 
+            status: 'operational', 
+            database: 'connected',
+            timestamp: new Date().toISOString()
+        });
+    } catch {
+        res.json({ 
+            status: 'operational', 
+            database: 'disconnected',
+            timestamp: new Date().toISOString()
+        });
+    }
 });
 
 router.get('/api/docs', (req, res) => {
@@ -120,9 +143,9 @@ router.get('/api/docs', (req, res) => {
 // GET /api/users - List all users
 router.get('/api/users', async (req, res) => {
     try {
-        if (!db) throw new Error('Database not connected');
+        const database = await getDb();
         
-        const users = await db.collection('users')
+        const users = await database.collection('users')
             .find({}, { projection: { username: 1 } })
             .sort({ username: 1 })
             .toArray();
@@ -143,7 +166,7 @@ router.get('/api/users', async (req, res) => {
 // POST /api/users - Create new user
 router.post('/api/users', async (req, res) => {
     try {
-        if (!db) throw new Error('Database not connected');
+        const database = await getDb();
         
         const { username } = req.body;
         
@@ -154,7 +177,7 @@ router.post('/api/users', async (req, res) => {
         const cleanUsername = username.trim();
         
         // Check if user exists
-        const existingUser = await db.collection('users').findOne({ 
+        const existingUser = await database.collection('users').findOne({ 
             username: cleanUsername 
         });
         
@@ -167,7 +190,7 @@ router.post('/api/users', async (req, res) => {
         }
         
         // Create new user
-        const result = await db.collection('users').insertOne({
+        const result = await database.collection('users').insertOne({
             username: cleanUsername,
             createdAt: new Date()
         });
@@ -186,7 +209,7 @@ router.post('/api/users', async (req, res) => {
 // POST /api/users/:_id/exercises - Add exercise
 router.post('/api/users/:_id/exercises', async (req, res) => {
     try {
-        if (!db) throw new Error('Database not connected');
+        const database = await getDb();
         
         const { _id } = req.params;
         const { description, duration, date } = req.body;
@@ -209,7 +232,7 @@ router.post('/api/users/:_id/exercises', async (req, res) => {
         }
         
         // Find user
-        const user = await db.collection('users').findOne({ _id: userId });
+        const user = await database.collection('users').findOne({ _id: userId });
         if (!user) {
             return res.status(404).json({ error: 'User not found' });
         }
@@ -234,7 +257,7 @@ router.post('/api/users/:_id/exercises', async (req, res) => {
             createdAt: new Date()
         };
         
-        await db.collection('exercises').insertOne(exercise);
+        await database.collection('exercises').insertOne(exercise);
         
         // Return user object with exercise fields added (FCC requirement)
         res.json({
@@ -254,7 +277,7 @@ router.post('/api/users/:_id/exercises', async (req, res) => {
 // GET /api/users/:_id/logs - Get exercise logs
 router.get('/api/users/:_id/logs', async (req, res) => {
     try {
-        if (!db) throw new Error('Database not connected');
+        const database = await getDb();
         
         const { _id } = req.params;
         const { from, to, limit } = req.query;
@@ -268,7 +291,7 @@ router.get('/api/users/:_id/logs', async (req, res) => {
         }
         
         // Find user
-        const user = await db.collection('users').findOne({ _id: userId });
+        const user = await database.collection('users').findOne({ _id: userId });
         if (!user) {
             return res.status(404).json({ error: 'User not found' });
         }
@@ -317,7 +340,7 @@ router.get('/api/users/:_id/logs', async (req, res) => {
         }
         
         // Get exercises
-        const exercises = await db.collection('exercises').aggregate(pipeline).toArray();
+        const exercises = await database.collection('exercises').aggregate(pipeline).toArray();
         
         // Format log array per FCC requirements:
         // - description: string
@@ -375,7 +398,7 @@ process.on('SIGINT', async () => {
     process.exit(0);
 });
 
-// Start server
+// Start server (local dev only — Vercel uses module.exports)
 async function startServer() {
     const connected = await connectDatabase();
     if (!connected) {
@@ -389,6 +412,8 @@ async function startServer() {
     });
 }
 
-startServer();
+if (!process.env.VERCEL) {
+    startServer();
+}
 
 module.exports = app;
