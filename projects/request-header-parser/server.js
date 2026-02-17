@@ -13,6 +13,7 @@ const path = require('path');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
+const router = express.Router();
 const NODE_ENV = process.env.NODE_ENV || 'development';
 
 // ============================================
@@ -52,21 +53,19 @@ const limiter = rateLimit({
 app.use('/api', limiter);
 
 // Static files
-app.use(express.static(path.join(__dirname, 'public'), {
-  maxAge: NODE_ENV === 'production' ? '1d' : 0,
-  etag: true
-}));
+app.use(express.static(path.join(__dirname, 'public')));
+app.use('/request-header-parser', express.static(path.join(__dirname, 'public')));
 
 // ============================================
 // ROUTES
 // ============================================
 
-app.get('/', (req, res) => {
+router.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 // Health check
-app.get('/health', (req, res) => {
+router.get('/health', (req, res) => {
   res.json({
     status: 'operational',
     uptime: process.uptime(),
@@ -76,7 +75,7 @@ app.get('/health', (req, res) => {
 });
 
 // API documentation
-app.get('/api/docs', (req, res) => {
+router.get('/api/docs', (req, res) => {
   res.json({
     name: 'Signal',
     version: '2.0.0',
@@ -99,7 +98,7 @@ app.get('/api/docs', (req, res) => {
 });
 
 // Core endpoint — client identity
-app.get('/api/whoami', (req, res) => {
+router.get('/api/whoami', (req, res) => {
   try {
     const ipaddress = req.ip ||
       req.headers['x-forwarded-for']?.split(',')[0].trim() ||
@@ -118,6 +117,9 @@ app.get('/api/whoami', (req, res) => {
     });
   }
 });
+
+app.use('/', router);
+app.use('/request-header-parser', router);
 
 // 404 handler
 app.use((req, res) => {

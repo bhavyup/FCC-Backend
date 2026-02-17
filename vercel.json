@@ -22,11 +22,11 @@
       "dest": "/projects/timestamp-microservice/server.js"
     },
     {
-      "src": "/header-parser",
+      "src": "/request-header-parser",
       "dest": "/projects/request-header-parser/server.js"
     },
     {
-      "src": "/header-parser/(.*)",
+      "src": "/request-header-parser/(.*)",
       "dest": "/projects/request-header-parser/server.js"
     }
   ]
