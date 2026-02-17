@@ -78,17 +78,18 @@
     setTimeout(() => el.classList.remove('highlight'), 1200);
   };
 
-  // Resolve base path from pathname (immune to #hash and ?query)
-  const basePath = window.location.pathname.endsWith('/')
-    ? 'api'
-    : '/api';
+  // Derive mount prefix from pathname (works at / and /request-header-parser/)
+  // e.g. "/request-header-parser/" → "/request-header-parser"
+  //      "/request-header-parser"  → "/request-header-parser"
+  //      "/"                       → ""
+  const mountPrefix = window.location.pathname.replace(/\/+$/, '');
 
   const scanIdentity = async () => {
     setStatus('scanning', 'scanning');
     btnScan.disabled = true;
 
     try {
-      const res = await fetch(`${basePath}/whoami`);
+      const res = await fetch(`${mountPrefix}/api/whoami`);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
 
@@ -183,10 +184,15 @@
     const endpoint = consoleInput.value.trim();
     if (!endpoint) return;
 
+    // Prepend mount prefix for paths like /api/whoami
+    const url = endpoint.startsWith('http')
+      ? endpoint
+      : `${mountPrefix}${endpoint.startsWith('/') ? '' : '/'}${endpoint}`;
+
     addConsoleLine('command', endpoint);
 
     try {
-      const res = await fetch(endpoint);
+      const res = await fetch(url);
       const data = await res.json();
       addConsoleLine('output', JSON.stringify(data, null, 2));
     } catch (err) {
