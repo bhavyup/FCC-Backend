@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <clipPath id="clip-shape">
+      <rect width="512" height="512" rx="64" />
+    </clipPath>
+  </defs>
+
+  <!-- Background: Receipt White -->
+  <rect width="512" height="512" fill="#fafafa" rx="64" />
+  
+  <!-- Main Composition Group -->
+  <g clip-path="url(#clip-shape)">
+    
+    <!-- Decorative Grid (Swiss Style/Graph Paper hint) -->
+    <path d="M64 64 L64 448 M128 64 L128 448 M192 64 L192 448 M256 64 L256 448 M320 64 L320 448 M384 64 L384 448 M448 64 L448 448" stroke="#e5e5e5" stroke-width="2" />
+    <path d="M64 64 L448 64 M64 128 L448 128 M64 192 L448 192 M64 256 L448 256 M64 320 L448 320 M64 384 L448 384 M64 448 L448 448" stroke="#e5e5e5" stroke-width="2" />
+
+    <!-- The "Thermal Block" (Black Receipt Representation) -->
+    <!-- Creating a serrated edge at the bottom using a path -->
+    <path d="
+      M 112 112 
+      H 352 
+      V 384 
+      L 337 369 L 322 384 
+      L 307 369 L 292 384 
+      L 277 369 L 262 384 
+      L 247 369 L 232 384 
+      L 217 369 L 202 384 
+      L 187 369 L 172 384 
+      L 157 369 L 142 384 
+      L 127 369 L 112 384 
+      Z" 
+      fill="#0a0a0a" 
+    />
+
+    <!-- Data Lines (Monospace/Terminal feel) -->
+    <!-- Representing the "Telemetry" -->
+    <rect x="144" y="144" width="176" height="12" fill="#fafafa" opacity="0.9" />
+    <rect x="144" y="176" width="120" height="12" fill="#fafafa" opacity="0.9" />
+    
+    <!-- Dashed Separator -->
+    <line x1="144" y1="208" x2="320" y2="208" stroke="#fafafa" stroke-width="2" stroke-dasharray="8 8" opacity="0.5"/>
+
+    <!-- Data Blocks -->
+    <rect x="144" y="232" width="64" height="64" fill="#fafafa" opacity="0.9" />
+    <rect x="224" y="232" width="16" height="64" fill="#fafafa" opacity="0.5" />
+    <rect x="256" y="232" width="16" height="48" fill="#fafafa" opacity="0.5" />
+    <rect x="288" y="232" width="16" height="32" fill="#fafafa" opacity="0.5" />
+
+    <!-- The "Kinetic" Shift Element (Alert Orange) -->
+    <!-- Positioned to look like it's sliding/popping out, breaking the grid -->
+    <!-- Represents the physics-based interaction -->
+    <rect x="304" y="80" width="128" height="128" fill="#ff3d00" />
+    
+    <!-- Kinetic Arrow Icon inside the Orange Block -->
+    <path d="M 344 144 L 392 144 M 392 144 L 376 128 M 392 144 L 376 160" stroke="#0a0a0a" stroke-width="8" stroke-linecap="square" fill="none" />
+
+  </g>
+</svg>

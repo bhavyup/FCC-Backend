@@ -1,100 +1,96 @@
-# PULSE
+# KINETIC — Exercise Telemetry System
 
-> Exercise tracking as living rhythm.
+[![FCC Backend](https://img.shields.io/badge/FCC-Backend_Certification-0a0a0a?style=flat-square)](https://www.freecodecamp.org/)
+[![Node.js](https://img.shields.io/badge/Node.js-18+-0a0a0a?style=flat-square&logo=node.js)](https://nodejs.org/)
+[![MongoDB](https://img.shields.io/badge/MongoDB-Atlas-0a0a0a?style=flat-square&logo=mongodb)](https://www.mongodb.com/)
+[![Vercel](https://img.shields.io/badge/Vercel-Deploy-0a0a0a?style=flat-square&logo=vercel)](https://vercel.com)
 
-PULSE is a production-grade exercise tracker microservice with a medical monitor aesthetic. Each user is a "signal", each exercise is a "beat" on their lifeline. The interface visualizes fitness data as a living ECG — raw, functional, alive.
-
-![Aesthetic](https://img.shields.io/badge/aesthetic-terminal%20monitor-00FF41)
-![License](https://img.shields.io/badge/license-MIT-blue)
+A brutalist, motion-first exercise tracking API that rejects the purple-gradient AI aesthetic in favor of thermal receipt nostalgia and Swiss typography.
 
 ## Design Philosophy
 
-Unlike typical fitness trackers with purple gradients and glassmorphism, PULSE draws from:
+**KINETIC** treats data like telemetry from a high-performance machine. No gradients. No shadows. Just raw information density with kinetic (motion) feedback.
 
-- **Medical monitors**: ECG visualization, terminal green on charcoal
-- **Brutalist web design**: Raw data, monospace fonts, scanlines
-- **Functional minimalism**: Every pixel serves a purpose
-
-**Visual language:**
-- Deep charcoal (#0D0D0D) background
-- Terminal green (#00FF41) pulse accent
-- JetBrains Mono + Space Grotesk typography
-- Live ECG animation in the hero
-- Each user card shows a sparkline of their exercise history
+- **Visual Language**: Thermal printer receipts meets Swiss brutalism
+- **Color Palette**: Thermal Black (#0a0a0a), Receipt White (#fafafa), Alert Orange (#ff3d00)
+- **Typography**: IBM Plex Mono (data) + Space Grotesk (headings)
+- **Interactions**: Spring physics, stagger animations, receipt printing effects
 
 ## Features
 
-- ⚡ **Fast**: In-memory or MongoDB storage
-- 🔒 **Secure**: Helmet headers, CORS, rate limiting
-- 📊 **Visual**: Live ECG animation, sparkline charts
-- 🎨 **Unique**: Medical monitor aesthetic, zero generic patterns
-- 🧪 **fCC Certified**: Passes all 16 freeCodeCamp Exercise Tracker tests
-- 🔧 **Subpath Ready**: Configured for `mysite.me/exercise-tracker`
+- ✅ **Create Athletes** — Minimal identifier-based user creation
+- ✅ **Log Activities** — Track exercises with duration and date
+- ✅ **Thermal Receipts** — Data outputs look like printed receipts with serrated edges
+- ✅ **Query System** — Filter logs by date range and limit results
+- ✅ **Real-time Clock** — System status indicator
+- ✅ **Physics UI** — Spring-based button interactions and staggered list animations
+- ✅ **Clipboard Integration** — One-click ID copying
+- ✅ **Auto-fill** — Smart form population between sections
 
-## API
+## API Endpoints
 
-All routes are prefixed with `/exercise-tracker`.
+### `POST /api/users`
+Create a new athlete.
 
-### Create a User (Signal)
-```http
-POST /exercise-tracker/api/users
-Content-Type: application/x-www-form-urlencoded
+**Body**: `username` (form-data)
 
-username=johndoe
-```
-
-**Response:**
+**Response**:
 ```json
 {
-  "username": "johndoe",
-  "_id": "abc123"
+  "username": "john_doe",
+  "_id": "507f1f77bcf86cd799439011"
 }
 ```
 
-### List All Users
-```http
-GET /exercise-tracker/api/users
-```
+### `GET /api/users`
+List all registered athletes.
 
-**Response:**
+**Response**:
 ```json
 [
-  { "username": "johndoe", "_id": "abc123" }
+  { "username": "john_doe", "_id": "507f1f77bcf86cd799439011" }
 ]
 ```
 
-### Add Exercise (Record Pulse)
-```http
-POST /exercise-tracker/api/users/:_id/exercises
-Content-Type: application/x-www-form-urlencoded
+### `POST /api/users/:_id/exercises`
+Log an activity for an athlete.
 
-description=running&duration=30&date=2024-01-15
-```
+**Body**: 
+- `description` (string, required)
+- `duration` (number, required)
+- `date` (string, optional, format: YYYY-MM-DD)
 
-**Response:**
+**Response**:
 ```json
 {
-  "_id": "abc123",
-  "username": "johndoe",
-  "description": "running",
+  "_id": "507f1f77bcf86cd799439011",
+  "username": "john_doe",
+  "description": "Running",
   "duration": 30,
-  "date": "Mon Jan 15 2024"
+  "date": "Mon Jan 01 2024"
 }
 ```
 
-### Get Exercise Log (Analyze Signal)
-```http
-GET /exercise-tracker/api/users/:_id/logs?from=2024-01-01&to=2024-12-31&limit=10
-```
+### `GET /api/users/:_id/logs`
+Retrieve activity logs with optional filtering.
 
-**Response:**
+**Query Parameters**:
+- `from` (date, format: YYYY-MM-DD)
+- `to` (date, format: YYYY-MM-DD)
+- `limit` (number)
+
+**Response**:
 ```json
 {
-  "_id": "abc123",
-  "username": "johndoe",
+  "_id": "507f1f77bcf86cd799439011",
+  "username": "john_doe",
   "count": 2,
   "log": [
-    { "description": "running", "duration": 30, "date": "Mon Jan 15 2024" }
+    {
+      "description": "Running",
+      "duration": 30,
+      "date": "Mon Jan 01 2024"
+    }
   ]
 }
 ```
@@ -102,72 +98,90 @@ GET /exercise-tracker/api/users/:_id/logs?from=2024-01-01&to=2024-12-31&limit=10
 ## Installation
 
 ```bash
-# Clone and enter
-cd pulse
+# Clone repository
+git clone <repo-url>
+cd kinetic-exercise-tracker
 
 # Install dependencies
 npm install
 
-# Run locally
+# Environment variables
+cp .env.example .env
+# Edit .env with your MongoDB URI:
+# MONGO_URI=mongodb+srv://user:pass@cluster.mongodb.net/kinetic_tracker
+
+# Run development server
 npm run dev
+
+# Production
+npm start
 ```
-
-Visit `http://localhost:3000/exercise-tracker`
-
-## Environment Variables
-
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `PORT` | Server port | `3000` |
-| `NODE_ENV` | Environment | `development` |
-| `MONGO_URI` | MongoDB connection (optional) | — |
-
-Without `MONGO_URI`, PULSE uses in-memory storage.
 
 ## Deployment
 
-### Vercel
+### Vercel (Recommended)
 
-```bash
-npm i -g vercel
-vercel --prod
-```
+1. Install Vercel CLI: `npm i -g vercel`
+2. Login: `vercel login`
+3. Deploy: `vercel --prod`
+4. Add environment variable in Vercel Dashboard:
+   - `MONGO_URI`: Your MongoDB Atlas connection string
 
-The `vercel.json` handles all routing with the `/exercise-tracker` base path.
+The included `vercel.json` handles all routing configuration automatically.
 
-### Custom Domain with Subpath
+### MongoDB Atlas Setup
 
-If deploying to `mysite.me/exercise-tracker`, ensure your reverse proxy or server config routes `/exercise-tracker/*` to the app. The app handles the base path internally.
+1. Create a free cluster at [mongodb.com](https://www.mongodb.com/)
+2. Database Access → Create User
+3. Network Access → Allow from anywhere (0.0.0.0/0)
+4. Clusters → Connect → Drivers → Node.js → Copy URI
+5. Replace `<password>` with your user password
 
-## freeCodeCamp Tests
+## FCC Certification Requirements
 
-PULSE satisfies all 16 fCC Exercise Tracker requirements:
+This implementation passes all 16 FreeCodeCamp Backend Certification tests:
 
-1. ✅ POST `/api/users` creates user with `username`
+1. ✅ POST `/api/users` creates user with username
 2. ✅ Returns object with `username` and `_id`
-3. ✅ GET `/api/users` returns array of users
-4. ✅ Each user has `username` and `_id`
-5. ✅ POST `/api/users/:_id/exercises` with `description`, `duration`, optional `date`
-6. ✅ Returns user object with exercise fields added
-7. ✅ GET `/api/users/:_id/logs` returns user with `count` and `log` array
-8. ✅ Each log entry has `description` (string), `duration` (number), `date` (string)
-9. ✅ Date uses `Date.toDateString()` format
-10. ✅ Supports `from`, `to`, `limit` query parameters
+3. ✅ GET `/api/users` returns array
+4. ✅ Array contains user objects
+5. ✅ User objects have `username` and `_id`
+6. ✅ POST `/api/users/:_id/exercises` accepts description, duration, optional date
+7. ✅ Returns user object with exercise fields added
+8. ✅ GET `/api/users/:_id/logs` retrieves full log
+9. ✅ Returns user object with `count` property
+10. ✅ Returns user object with `log` array
+11. ✅ Log items have `description`, `duration`, `date`
+12. ✅ `description` is string
+13. ✅ `duration` is number
+14. ✅ `date` is string (dateString format)
+15. ✅ Supports `from`, `to`, `limit` query parameters
+16. ✅ Date parameters in `yyyy-mm-dd` format
 
-## Keyboard Shortcuts
+## Technical Stack
 
-| Shortcut | Action |
-|----------|--------|
-| `Esc` | Close response panels |
-| `Tab` | Navigate between inputs |
+- **Runtime**: Node.js 18+
+- **Framework**: Express.js 4.x
+- **Database**: MongoDB Atlas with native driver
+- **Styling**: Vanilla CSS (no frameworks)
+- **Typography**: Google Fonts (IBM Plex Mono, Space Grotesk)
+- **Deployment**: Vercel Serverless Functions
 
-## Tech Stack
+## Design Decisions
 
-- **Backend**: Node.js, Express, Helmet, CORS, Rate-limit
-- **Frontend**: Vanilla JS, Canvas API for ECG/sparklines
-- **Storage**: Memory (dev) or MongoDB (prod)
-- **Fonts**: JetBrains Mono, Space Grotesk (Google Fonts)
+### Why No Frameworks?
+This project demonstrates mastery of vanilla web technologies. Every animation, every transition, every physics calculation is hand-coded to show deep understanding of the platform.
+
+### Why Thermal Receipts?
+Receipts are honest. They don't try to look pretty—they present information with clarity and authority. The thermal printer aesthetic (monospace, high contrast, serrated edges) creates an immediate visual metaphor: "This is your data, printed in reality."
+
+### Why Brutalism?
+Most "modern" web apps look identical. KINETIC rejects the soft shadows, rounded corners, and purple gradients in favor of asymmetric grids, stark contrasts, and functional beauty.
 
 ## License
 
-MIT © 2024
+MIT License — Built for the FreeCodeCamp Backend Certification.
+
+---
+
+**[KINETIC]** Exercise Telemetry System v1.0.0

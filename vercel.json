@@ -4,7 +4,9 @@
     {
       "src": "projects/timestamp-microservice/server.js",
       "use": "@vercel/node",
-      "config": { "includeFiles": ["projects/timestamp-microservice/public/**"] }
+      "config": {
+        "includeFiles": ["projects/timestamp-microservice/public/**"]
+      }
     },
     {
       "src": "projects/request-header-parser/server.js",
@@ -12,9 +14,14 @@
       "config": { "includeFiles": ["projects/request-header-parser/public/**"] }
     },
     {
-        "src": "projects/url-shortener/server.js",
-        "use": "@vercel/node",
-        "config": { "includeFiles": ["projects/url-shortener/public/**"] }
+      "src": "projects/url-shortener/server.js",
+      "use": "@vercel/node",
+      "config": { "includeFiles": ["projects/url-shortener/public/**"] }
+    },
+    {
+      "src": "projects/exercise-tracker/server.js",
+      "use": "@vercel/node",
+      "config": { "includeFiles": ["projects/exercise-tracker/public/**"] }
     }
   ],
   "routes": [
@@ -41,6 +48,14 @@
     {
       "src": "/url-shortener/(.*)",
       "dest": "/projects/url-shortener/server.js"
+    },
+    {
+      "src": "/exercise-tracker",
+      "dest": "/projects/exercise-tracker/server.js"
+    },
+    {
+      "src": "/exercise-tracker/(.*)",
+      "dest": "/projects/exercise-tracker/server.js"
     }
   ]
 }
