@@ -191,7 +191,7 @@
     // If the URL does NOT end with a slash, we need to be explicit
     // e.g. visiting /timestamp -> fetch('timestamp/api')
     if (!window.location.href.endsWith("/")) {
-      basePath = "timestamp/api";
+      basePath = "/api";
     }
 
     const endpoint = value
