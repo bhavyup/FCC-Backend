@@ -1,99 +1,138 @@
-# Bolt
+# Knot
 
-URL compression engine. Shortens URLs into clean, redirect-ready links with protocol and DNS validation.
+> A URL shortener that ties the web together.
 
-Built with Node.js and Express. Uses MongoDB for persistent storage with an in-memory fallback for local development.
+Knot is a production-grade URL shortening microservice with a craft-inspired interface. Long URLs are loose threads; we tie them into tight, shareable knots.
+
+![Design Philosophy](https://img.shields.io/badge/design-craft%20aesthetic-8B5A2B)
+![License](https://img.shields.io/badge/license-MIT-blue)
+
+## Design Philosophy
+
+Unlike typical URL shorteners that follow the same centered-card pattern, Knot draws from traditional craft — rope, twine, and macramé — executed with brutalist-modern web aesthetics:
+
+- **Asymmetric split-screen layout**: Workbench (left) vs. Spool (right)
+- **Warm, earthy palette**: Raw linen, hemp brown, slate — zero gradients, zero purple AI vibes
+- **Typography**: Space Grotesk + IBM Plex Mono
+- **Interaction metaphor**: URLs visually "tie" into knots along a rope timeline
+
+## Features
+
+- ⚡ **Fast**: In-memory storage with optional MongoDB persistence
+- 🔒 **Secure**: Helmet headers, CORS, rate limiting (100 req/15min)
+- 🎨 **Unique**: Craft-inspired UI with zero generic SaaS patterns
+- 📱 **Responsive**: Adapts from split-screen to stacked on mobile
+- 🧪 **fCC Certified**: Passes all freeCodeCamp URL Shortener Microservice tests
 
 ## API
 
-Base URL: `http://localhost:3002`
+### Create a Short URL
+```http
+POST /api/shorturl
+Content-Type: application/x-www-form-urlencoded
 
-### `POST /api/shorturl`
-
-Shorten a URL. Send as form-encoded or JSON body with a `url` field.
-
-```bash
-curl -X POST -d "url=https://example.com" localhost:3002/api/shorturl
+url=https://example.com/very/long/path
 ```
 
+**Response:**
 ```json
 {
-  "original_url": "https://example.com",
+  "original_url": "https://example.com/very/long/path",
   "short_url": 1
 }
 ```
 
-Invalid URLs return:
+### Redirect to Original
+```http
+GET /api/shorturl/1
+```
 
+Returns a 302 redirect to the original URL.
+
+### List All URLs
+```http
+GET /api/urls
+```
+
+**Response:**
 ```json
 {
-  "error": "invalid url"
+  "count": 42,
+  "urls": [...]
 }
 ```
 
-### `GET /api/shorturl/:id`
+### Health Check
+```http
+GET /health
+```
 
-Redirects (302) to the original URL.
-
-### `GET /api/urls`
-
-Lists all shortened URLs with total count.
-
-### `GET /health`
-
-Service health check.
-
-## Validation
-
-URLs must use `http://` or `https://` protocol and resolve via DNS lookup.
-
-| Input | Valid |
-|-------|:-----:|
-| `https://www.example.com` | Yes |
-| `http://example.com/path` | Yes |
-| `ftp://files.com` | No |
-| `www.example.com` | No |
-| `not-a-url` | No |
-
-## Stack
-
-- Express 4.18 with Helmet, Morgan, Compression, CORS
-- MongoDB Atlas (persistent) / In-memory (fallback)
-- Rate limiting: 100 requests / 15 min per IP
-- DNS validation via `dns.lookup`
-- Vanilla HTML/CSS/JS frontend with Sora + Inconsolata
-
-## Setup
+## Installation
 
 ```bash
-cd projects/url-shortener
+# Clone and enter
+cd knot
+
+# Install dependencies
 npm install
 
-# Optional: create .env for persistence
-echo "MONGO_URI=your_mongodb_uri" > .env
-
-npm run dev     # development with nodemon
-npm start       # production
+# Run locally
+npm run dev
 ```
 
-Server starts at `http://localhost:3002`. Without `MONGO_URI`, URLs are stored in memory (lost on restart).
+Visit `http://localhost:3000`
 
-## Environment
+## Environment Variables
 
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `PORT` | `3002` | Server port |
-| `NODE_ENV` | `development` | Environment mode |
-| `MONGO_URI` | — | MongoDB connection string |
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `PORT` | Server port | `3000` |
+| `NODE_ENV` | Environment | `development` |
+| `MONGO_URI` | MongoDB connection (optional) | — |
 
-## Deploy
+Without `MONGO_URI`, Knot uses in-memory storage (resets on restart).
 
-Includes `vercel.json` for Vercel deployment. Set `MONGO_URI` in Vercel environment variables.
+## Deployment
+
+### Vercel
 
 ```bash
-vercel deploy
+npm i -g vercel
+vercel --prod
 ```
+
+The included `vercel.json` handles all routing.
+
+### Railway/Render/Heroku
+
+```bash
+git push origin main
+# Connect your repo to the platform
+```
+
+## freeCodeCamp Tests
+
+This project satisfies all fCC URL Shortener Microservice requirements:
+
+1. ✅ POST to `/api/shorturl` returns `{original_url, short_url}`
+2. ✅ GET to `/api/shorturl/:id` redirects (302) to original URL
+3. ✅ Invalid URLs return `{error: 'invalid url'}`
+4. ✅ DNS validation ensures URLs resolve
+
+## Keyboard Shortcuts
+
+| Shortcut | Action |
+|----------|--------|
+| `Cmd/Ctrl + K` | Focus input |
+| `Esc` | Close result card |
+
+## Tech Stack
+
+- **Backend**: Node.js, Express, Helmet, CORS, Rate-limit
+- **Frontend**: Vanilla JS, CSS Grid/Flexbox, CSS Custom Properties
+- **Storage**: Memory (dev) or MongoDB (prod)
+- **Fonts**: Space Grotesk, IBM Plex Mono (Google Fonts)
 
 ## License
 
-MIT
+MIT © 2024
