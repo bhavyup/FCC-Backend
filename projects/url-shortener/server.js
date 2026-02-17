@@ -1,173 +1,310 @@
+/**
+ * Bolt — URL Compression Engine
+ * Production-grade URL shortening microservice.
+ */
+
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
+const helmet = require('helmet');
+const morgan = require('morgan');
+const compression = require('compression');
+const rateLimit = require('express-rate-limit');
 const dns = require('dns');
+const { promisify } = require('util');
 const path = require('path');
-const { MongoClient } = require('mongodb');
+
+const dnsLookup = promisify(dns.lookup);
 
 const app = express();
 const PORT = process.env.PORT || 3002;
+const NODE_ENV = process.env.NODE_ENV || 'development';
 
-// MongoDB connection
-const MONGO_URI = process.env.MONGO_URI;
+// ============================================
+// STORAGE ABSTRACTION
+// ============================================
 
-if (!MONGO_URI) {
-  console.error('❌ MONGO_URI is not defined in environment variables!');
-  process.exit(1);
-}
-
-let db;
-
-// Connect to MongoDB
-async function connectDB() {
-  try {
-    const client = new MongoClient(MONGO_URI);
-    await client.connect();
-    db = client.db('urlshortener');
-    console.log('✅ Connected to MongoDB Atlas');
-  } catch (error) {
-    console.error('❌ MongoDB connection error:', error.message);
-    process.exit(1);
+class MemoryStore {
+  constructor() {
+    this.urls = new Map();
+    this.counter = 0;
+  }
+  async findByOriginal(url) {
+    for (const [, doc] of this.urls) {
+      if (doc.original_url === url) return doc;
+    }
+    return null;
+  }
+  async findByShort(id) {
+    return this.urls.get(Number(id)) || null;
+  }
+  async create(originalUrl) {
+    this.counter++;
+    const doc = { original_url: originalUrl, short_url: this.counter };
+    this.urls.set(this.counter, doc);
+    return doc;
+  }
+  async list() {
+    return [...this.urls.values()].reverse();
+  }
+  async count() {
+    return this.counter;
   }
 }
 
-// Middleware
-app.use(cors({
-  origin: '*',
-  methods: ['GET', 'POST', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true
+class MongoStore {
+  constructor(db) {
+    this.db = db;
+  }
+  async findByOriginal(url) {
+    return this.db.collection('urls').findOne({ original_url: url });
+  }
+  async findByShort(id) {
+    return this.db.collection('urls').findOne({ short_url: Number(id) });
+  }
+  async create(originalUrl) {
+    const counter = await this.db.collection('counters').findOneAndUpdate(
+      { _id: 'url_counter' },
+      { $inc: { count: 1 } },
+      { upsert: true, returnDocument: 'after' }
+    );
+    const doc = { original_url: originalUrl, short_url: counter.count };
+    await this.db.collection('urls').insertOne(doc);
+    return doc;
+  }
+  async list() {
+    return this.db.collection('urls').find({}).sort({ short_url: -1 }).limit(50).toArray();
+  }
+  async count() {
+    const c = await this.db.collection('counters').findOne({ _id: 'url_counter' });
+    return c ? c.count : 0;
+  }
+}
+
+let store;
+
+async function initStore() {
+  const uri = process.env.MONGO_URI;
+  if (uri) {
+    try {
+      const { MongoClient } = require('mongodb');
+      const client = new MongoClient(uri);
+      await client.connect();
+      store = new MongoStore(client.db('urlshortener'));
+      console.log('  Storage:     MongoDB Atlas');
+    } catch (err) {
+      console.warn('  MongoDB failed, falling back to memory:', err.message);
+      store = new MemoryStore();
+    }
+  } else {
+    store = new MemoryStore();
+    console.log('  Storage:     In-memory (set MONGO_URI for persistence)');
+  }
+}
+
+// ============================================
+// MIDDLEWARE
+// ============================================
+
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://fonts.gstatic.com"],
+      styleSrcElem: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://fonts.gstatic.com"],
+      fontSrc: ["'self'", "https://fonts.gstatic.com"],
+      connectSrc: ["'self'", "*"],
+      scriptSrc: ["'self'", "https://cdn.freecodecamp.org"],
+      imgSrc: ["'self'", "data:", "https:"],
+    },
+  },
 }));
-app.options('*', cors());
+
+app.use(cors({ optionsSuccessStatus: 200 }));
+app.use(morgan(NODE_ENV === 'production' ? 'combined' : 'dev'));
+app.use(compression());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static('public'));
 
-// Home route
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+  message: { error: 'Too many requests. Please try again later.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+app.use('/api', limiter);
+
+app.use(express.static(path.join(__dirname, 'public'), {
+  maxAge: NODE_ENV === 'production' ? '1d' : 0,
+  etag: true
+}));
+
+// ============================================
+// URL VALIDATION
+// ============================================
+
+async function validateUrl(urlString) {
+  let parsed;
+  try {
+    parsed = new URL(urlString);
+  } catch {
+    return false;
+  }
+  if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+    return false;
+  }
+  try {
+    await dnsLookup(parsed.hostname);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+// ============================================
+// ROUTES
+// ============================================
+
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// ============================================
-// URL SHORTENER ROUTES
-// ============================================
+app.get('/health', (req, res) => {
+  res.json({
+    status: 'operational',
+    uptime: process.uptime(),
+    timestamp: Date.now(),
+    environment: NODE_ENV
+  });
+});
 
-// POST /api/shorturl - Create short URL
+app.get('/api/docs', (req, res) => {
+  res.json({
+    name: 'Bolt',
+    version: '2.0.0',
+    description: 'URL compression engine',
+    endpoints: {
+      'POST /api/shorturl': {
+        description: 'Shorten a URL',
+        body: { url: 'string — full URL with http/https protocol' },
+        response: '{ original_url, short_url }',
+        errors: '{ error: "invalid url" }'
+      },
+      'GET /api/shorturl/:id': {
+        description: 'Redirect to original URL (302)'
+      },
+      'GET /api/urls': {
+        description: 'List all shortened URLs with count'
+      },
+      'GET /health': {
+        description: 'Service health check'
+      }
+    },
+    rateLimit: '100 requests per 15 minutes'
+  });
+});
+
+// Create short URL
 app.post('/api/shorturl', async (req, res) => {
   try {
     const originalUrl = req.body.url;
-    console.log('POST /api/shorturl:', originalUrl);
 
-    // 1. Validate format using URL constructor
-    let parsedUrl;
-    try {
-      parsedUrl = new URL(originalUrl);
-    } catch (err) {
+    if (!originalUrl || typeof originalUrl !== 'string') {
       return res.json({ error: 'invalid url' });
     }
 
-    // 2. Validate Protocol (must be http or https)
-    if (parsedUrl.protocol !== 'http:' && parsedUrl.protocol !== 'https:') {
+    const trimmed = originalUrl.trim();
+    const valid = await validateUrl(trimmed);
+    if (!valid) {
       return res.json({ error: 'invalid url' });
     }
 
-    // 3. DNS Lookup to verify domain exists
-    dns.lookup(parsedUrl.hostname, async (err, address) => {
-      if (err || !address) {
-        console.log('DNS lookup failed for:', parsedUrl.hostname);
-        return res.json({ error: 'invalid url' });
-      }
+    // Return existing entry if URL was already shortened
+    const existing = await store.findByOriginal(trimmed);
+    if (existing) {
+      return res.json({
+        original_url: existing.original_url,
+        short_url: existing.short_url
+      });
+    }
 
-      try {
-        // Check if URL already exists
-        const existing = await db.collection('urls').findOne({ original_url: originalUrl });
-        if (existing) {
-          return res.json({
-            original_url: existing.original_url,
-            short_url: existing.short_url
-          });
-        }
-
-        // Get next counter value
-        const counterDoc = await db.collection('counters').findOneAndUpdate(
-          { _id: 'url_counter' },
-          { $inc: { count: 1 } },
-          { upsert: true, returnDocument: 'after' }
-        );
-
-        const shortUrl = counterDoc.count;
-
-        // Create new URL entry
-        const newEntry = {
-          original_url: originalUrl,
-          short_url: shortUrl
-        };
-
-        await db.collection('urls').insertOne(newEntry);
-
-        console.log('Created:', newEntry);
-
-        res.json({
-          original_url: originalUrl,
-          short_url: shortUrl
-        });
-      } catch (dbError) {
-        console.error('Database error:', dbError);
-        res.json({ error: 'Server error' });
-      }
+    const doc = await store.create(trimmed);
+    res.json({
+      original_url: doc.original_url,
+      short_url: doc.short_url
     });
-  } catch (error) {
-    console.error('Error:', error);
-    res.json({ error: 'Server error' });
+  } catch (err) {
+    console.error('POST /api/shorturl error:', err);
+    res.status(500).json({ error: 'Server error' });
   }
 });
 
-// GET /api/shorturl/:short_url - Redirect to original URL
-app.get('/api/shorturl/:short_url', async (req, res) => {
+// Redirect
+app.get('/api/shorturl/:id', async (req, res) => {
   try {
-    const shorturl = req.params.short_url;
-    console.log('GET /api/shorturl/', shorturl);
-
-    // Find URL in database
-    const urlDoc = await db.collection('urls').findOne({ short_url: parseInt(shorturl) });
-
-    if (!urlDoc) {
-      return res.json({ error: 'No short URL found' });
+    const doc = await store.findByShort(req.params.id);
+    if (!doc) {
+      return res.json({ error: 'No short URL found for the given input' });
     }
-
-    console.log('Redirecting to:', urlDoc.original_url);
-    res.redirect(urlDoc.original_url);
-  } catch (error) {
-    console.error('Error:', error);
-    res.json({ error: 'Server error' });
+    res.redirect(doc.original_url);
+  } catch (err) {
+    console.error('GET /api/shorturl/:id error:', err);
+    res.status(500).json({ error: 'Server error' });
   }
 });
 
-// GET /api/urls - Get all URLs (for debugging)
+// List all URLs
 app.get('/api/urls', async (req, res) => {
   try {
-    const urls = await db.collection('urls').find({}).toArray();
-    const counter = await db.collection('counters').findOne({ _id: 'url_counter' });
-    res.json({ 
-      count: urls.length,
-      counter: counter ? counter.count : 0,
-      urls 
-    });
-  } catch (error) {
-    res.json({ error: error.message });
+    const urls = await store.list();
+    const count = await store.count();
+    res.json({ count, urls });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 });
 
-// Health check
-app.get('/api/health', (req, res) => {
-  res.json({ status: 'OK', db: db ? 'connected' : 'disconnected' });
+// 404
+app.use((req, res) => {
+  res.status(404).json({
+    error: 'Not Found',
+    message: 'The requested endpoint does not exist',
+    availableEndpoints: ['/', '/api/shorturl', '/api/urls', '/api/docs', '/health']
+  });
 });
 
-// Start server after DB connection
-connectDB().then(() => {
-  app.listen(PORT, () => {
-    console.log(`🚀 URL Shortener running on port ${PORT}`);
+// Error handler
+app.use((err, req, res, next) => {
+  console.error('Unhandled error:', err);
+  res.status(err.status || 500).json({
+    error: 'Internal Server Error',
+    message: NODE_ENV === 'production'
+      ? 'An unexpected error occurred'
+      : err.message
+  });
+});
+
+// ============================================
+// START
+// ============================================
+
+initStore().then(() => {
+  const server = app.listen(PORT, () => {
+    console.log('\n  ┌───────────────────────────────┐');
+    console.log('  │  Bolt — Server Running          │');
+    console.log('  └───────────────────────────────┘\n');
+    console.log(`  Environment: ${NODE_ENV}`);
+    console.log(`  Port:        ${PORT}`);
+    console.log(`  URL:         http://localhost:${PORT}`);
+    console.log(`  Health:      http://localhost:${PORT}/health\n`);
+  });
+
+  process.on('SIGTERM', () => {
+    console.log('\nSIGTERM received. Shutting down...');
+    server.close(() => process.exit(0));
   });
 }).catch(err => {
-  console.error('Failed to start server:', err);
+  console.error('Failed to initialize:', err);
+  process.exit(1);
 });

@@ -14,6 +14,7 @@ const path = require('path');
 // Initialize Express app
 const app = express();
 const PORT = process.env.PORT || 3010;
+const router = express.Router();
 const NODE_ENV = process.env.NODE_ENV || 'development';
 
 // ============================================
@@ -63,10 +64,8 @@ const limiter = rateLimit({
 app.use('/api', limiter);
 
 // Static files
-app.use(express.static(path.join(__dirname, 'public'), {
-  maxAge: NODE_ENV === 'production' ? '1d' : 0,
-  etag: true
-}));
+app.use(express.static(path.join(__dirname, 'public')));
+app.use('/timestamp', express.static(path.join(__dirname, 'public')));
 
 // ============================================
 // UTILITY FUNCTIONS
@@ -122,12 +121,12 @@ const formatDateResponse = (date) => ({
 // ============================================
 
 // Home page
-app.get('/', (req, res) => {
+router.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 // Health check endpoint
-app.get('/health', (req, res) => {
+router.get('/health', (req, res) => {
   res.json({
     status: 'operational',
     uptime: process.uptime(),
@@ -137,7 +136,7 @@ app.get('/health', (req, res) => {
 });
 
 // API documentation
-app.get('/api/docs', (req, res) => {
+router.get('/api/docs', (req, res) => {
   res.json({
     name: 'Epoch',
     version: '2.0.0',
@@ -169,7 +168,7 @@ app.get('/api/docs', (req, res) => {
 });
 
 // Current timestamp endpoint
-app.get('/api', (req, res) => {
+router.get('/api', (req, res) => {
   try {
     const now = new Date();
     res.json(formatDateResponse(now));
@@ -183,7 +182,7 @@ app.get('/api', (req, res) => {
 });
 
 // Date conversion endpoint
-app.get('/api/:date', (req, res) => {
+router.get('/api/:date', (req, res) => {
   try {
     const { date } = req.params;
     
@@ -214,6 +213,9 @@ app.get('/api/:date', (req, res) => {
     });
   }
 });
+
+app.use('/', router);
+app.use('/timestamp', router);
 
 // 404 handler
 app.use((req, res) => {
